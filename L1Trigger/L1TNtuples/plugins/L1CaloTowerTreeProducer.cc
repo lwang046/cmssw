@@ -52,6 +52,7 @@ Implementation:
 
 #include "DataFormats/EcalDigi/interface/EcalDigiCollections.h"
 #include "DataFormats/HcalDigi/interface/HcalDigiCollections.h"
+#include "DataFormats/HcalDigi/interface/HcalUpgradeTriggerPrimitiveDigi.h"
 
 #include "DataFormats/L1TCalorimeter/interface/CaloTower.h"
 #include "DataFormats/L1TCalorimeter/interface/CaloCluster.h"
@@ -93,7 +94,7 @@ private:
 
   // EDM input tags
   edm::EDGetTokenT<EcalTrigPrimDigiCollection> ecalToken_;
-  edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalToken_;
+  edm::EDGetTokenT<HcalUpgradeTrigPrimDigiCollection> hcalToken_;
   edm::EDGetTokenT<l1t::CaloTowerBxCollection> l1TowerToken_;
   edm::EDGetTokenT<l1t::CaloClusterBxCollection> l1ClusterToken_;
 
@@ -106,7 +107,7 @@ L1CaloTowerTreeProducer::L1CaloTowerTreeProducer(const edm::ParameterSet& iConfi
 {
 
   ecalToken_ = consumes<EcalTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("ecalToken"));
-  hcalToken_ = consumes<HcalTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("hcalToken"));
+  hcalToken_ = consumes<HcalUpgradeTrigPrimDigiCollection>(iConfig.getUntrackedParameter<edm::InputTag>("hcalToken"));
   l1TowerToken_ = consumes<l1t::CaloTowerBxCollection>(iConfig.getUntrackedParameter<edm::InputTag>("l1TowerToken"));
 
   edm::InputTag clusterTag = iConfig.getUntrackedParameter<edm::InputTag>("l1ClusterToken");
@@ -161,7 +162,7 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
   iSetup.get<CaloTPGRecord>().get(decoder);
 
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPs;
-  edm::Handle<HcalTrigPrimDigiCollection> hcalTPs;
+  edm::Handle<HcalUpgradeTrigPrimDigiCollection> hcalTPs;
 
   iEvent.getByToken(ecalToken_, ecalTPs);
   iEvent.getByToken(hcalToken_, hcalTPs);
@@ -214,7 +215,74 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
 
       unsigned short fineGrain = (unsigned short) itr.SOI_fineGrain();
       
+      unsigned short nDepths = (unsigned short) itr.getDepthData().size();
+      float et_sum = 0;
+
+      HcalTrigTowerDetId id = itr.id();
+      id = HcalTrigTowerDetId(id.ieta(), id.iphi(), 1, id.version());
+      std::vector<int> energy_depth = itr.getDepthData();
+      for (int i = 0; i < static_cast<int>(energy_depth.size()); ++i) {
+        int depth = energy_depth[i];
+        if (depth > 0) {
+	  et_sum += depth;}
+      }
+      float tp_energy_ = decoder->hcaletValue(id, itr.SOI_compressedEt());
+      float DepthScale = 0;
+      if (et_sum > 0){
+        DepthScale = tp_energy_/et_sum;
+      }      
+
+
       if (compEt > 0 && (absIeta<29 || ver==1)) {
+
+	if (nDepths > 1){
+	  float Depth1 = (float) energy_depth[1];
+	  caloTPData_->hcalTPDepth1.push_back( Depth1*DepthScale );
+	}
+	else{caloTPData_->hcalTPDepth1.push_back( 0 );}
+
+	if (nDepths > 2){
+	  float Depth2 = (float) energy_depth[2];
+	  caloTPData_->hcalTPDepth2.push_back( Depth2*DepthScale );
+	}
+	else{caloTPData_->hcalTPDepth2.push_back( 0 );}
+
+	if (nDepths > 3){
+	  float Depth3 = (float) energy_depth[3];
+	  caloTPData_->hcalTPDepth3.push_back( Depth3*DepthScale );
+	}
+	else{caloTPData_->hcalTPDepth3.push_back( 0 );}
+
+	if (nDepths > 4){
+	  float Depth4 = (float) energy_depth[4];
+	  caloTPData_->hcalTPDepth4.push_back( Depth4*DepthScale );
+
+	}
+	else{caloTPData_->hcalTPDepth4.push_back( 0 );}
+	if (nDepths > 5){
+	  float Depth5 = (float) energy_depth[5];
+	  caloTPData_->hcalTPDepth5.push_back( Depth5*DepthScale );
+	}
+	else{caloTPData_->hcalTPDepth5.push_back( 0 );}
+
+	if (nDepths > 6){
+	  float Depth6 = (float) energy_depth[6];
+	  caloTPData_->hcalTPDepth6.push_back( Depth6*DepthScale );
+	}
+	else{caloTPData_->hcalTPDepth6.push_back( 0 );}
+
+	if (nDepths > 7){
+	  float Depth7 = (float) energy_depth[7];
+	  caloTPData_->hcalTPDepth7.push_back( Depth7*DepthScale );
+	}
+	else{caloTPData_->hcalTPDepth7.push_back( 0 );}
+
+
+        if (nDepths >2){
+	  caloTPData_->hcalTPnDepths.push_back( nDepths );
+	}
+	else{caloTPData_->hcalTPnDepths.push_back( 0 );}
+
 	caloTPData_->hcalTPieta.push_back( ieta );
 	caloTPData_->hcalTPCaliphi.push_back( cal_iphi );
 	caloTPData_->hcalTPiphi.push_back( iphi );
