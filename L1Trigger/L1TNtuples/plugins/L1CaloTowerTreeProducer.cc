@@ -238,44 +238,95 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	if (nDepths > 1){
 	  float Depth1 = (float) energy_depth[1];
 	  caloTPData_->hcalTPDepth1.push_back( Depth1*DepthScale );
+
+	  double t1 = itr.SOI_rising_avg(2);
+	  std::cout << "Timing1 = " << t1 << std::endl;
+	  if(t1>0) caloTPData_->hcalTPtiming1.push_back( t1 ); //itr.SOI_rising_avg(1) );
+	  else caloTPData_->hcalTPtiming1.push_back( -1.0 );
 	}
-	else{caloTPData_->hcalTPDepth1.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth1.push_back( 0 );
+	  caloTPData_->hcalTPtiming1.push_back( -1.0 );
+	}
 
 	if (nDepths > 2){
 	  float Depth2 = (float) energy_depth[2];
 	  caloTPData_->hcalTPDepth2.push_back( Depth2*DepthScale );
+
+	  double t2 = itr.SOI_rising_avg(3); 
+	  std::cout << "Timing2 = " << t2 << std::endl;
+	  if(t2>0) caloTPData_->hcalTPtiming2.push_back( t2 ); //itr.SOI_rising_avg(1) ); 
+	  else caloTPData_->hcalTPtiming2.push_back( -1.0 ); 
+	  //	  caloTPData_->hcalTPtiming2.push_back( itr.SOI_rising_avg(2) ); 
 	}
-	else{caloTPData_->hcalTPDepth2.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth2.push_back( 0 );
+	  caloTPData_->hcalTPtiming2.push_back( -1.0 );  
+	}
 
 	if (nDepths > 3){
 	  float Depth3 = (float) energy_depth[3];
 	  caloTPData_->hcalTPDepth3.push_back( Depth3*DepthScale );
+	  double t3 = itr.SOI_rising_avg(4); 
+	  if(t3>0) caloTPData_->hcalTPtiming3.push_back( t3 ); 
+	  else caloTPData_->hcalTPtiming3.push_back( -1.0 ); 
+	  //caloTPData_->hcalTPtiming3.push_back( itr.SOI_rising_avg(3) ); 
 	}
-	else{caloTPData_->hcalTPDepth3.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth3.push_back( 0 );
+	  caloTPData_->hcalTPtiming3.push_back( -1.0 );  
+	}
 
 	if (nDepths > 4){
 	  float Depth4 = (float) energy_depth[4];
 	  caloTPData_->hcalTPDepth4.push_back( Depth4*DepthScale );
-
+	  //	  caloTPData_->hcalTPtiming4.push_back( itr.SOI_rising_avg(4) ); 
+	  double t4 = itr.SOI_rising_avg(5);  
+	  if(t4>0) caloTPData_->hcalTPtiming4.push_back( t4 );  
+	  else caloTPData_->hcalTPtiming4.push_back( -1.0 ); 
 	}
-	else{caloTPData_->hcalTPDepth4.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth4.push_back( 0 );
+	  caloTPData_->hcalTPtiming4.push_back( -1.0 );  
+	}
 	if (nDepths > 5){
 	  float Depth5 = (float) energy_depth[5];
 	  caloTPData_->hcalTPDepth5.push_back( Depth5*DepthScale );
+	  double t5 = itr.SOI_rising_avg(6);  
+	  if(t5>0) caloTPData_->hcalTPtiming5.push_back( t5 ); 
+	  else caloTPData_->hcalTPtiming5.push_back( -1.0 );   
+	  //	  caloTPData_->hcalTPtiming5.push_back( itr.SOI_rising_avg(5) ); 
 	}
-	else{caloTPData_->hcalTPDepth5.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth5.push_back( 0 );
+	  caloTPData_->hcalTPtiming5.push_back( -1.0 );  
+	}
 
 	if (nDepths > 6){
 	  float Depth6 = (float) energy_depth[6];
 	  caloTPData_->hcalTPDepth6.push_back( Depth6*DepthScale );
+	  //	  caloTPData_->hcalTPtiming6.push_back( itr.SOI_rising_avg(6) ); 
+	  double t6 = itr.SOI_rising_avg(7); 
+	  if(t6>0) caloTPData_->hcalTPtiming6.push_back( t6 );  
+	  else caloTPData_->hcalTPtiming6.push_back( -1.0 ); 
 	}
-	else{caloTPData_->hcalTPDepth6.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth6.push_back( 0 );
+	  caloTPData_->hcalTPtiming6.push_back( -1.0 );  
+	}
 
 	if (nDepths > 7){
 	  float Depth7 = (float) energy_depth[7];
 	  caloTPData_->hcalTPDepth7.push_back( Depth7*DepthScale );
+	  //	  caloTPData_->hcalTPtiming7.push_back( itr.SOI_rising_avg(7) ); 
+	  double t7 = itr.SOI_rising_avg(8);
+	  if(t7>0) caloTPData_->hcalTPtiming7.push_back( t7 ); 
+	  else caloTPData_->hcalTPtiming7.push_back( -1.0 );   
 	}
-	else{caloTPData_->hcalTPDepth7.push_back( 0 );}
+	else{
+	  caloTPData_->hcalTPDepth7.push_back( 0 );
+	  caloTPData_->hcalTPtiming7.push_back( -1.0 );  
+	}
 
 
         if (nDepths >2){

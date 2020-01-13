@@ -35,6 +35,15 @@ namespace L1Analysis
       hcalTPDepth5.clear();
       hcalTPDepth6.clear();
       hcalTPDepth7.clear();
+      // Hcal timing info
+
+      hcalTPtiming1.clear();
+      hcalTPtiming2.clear();
+      hcalTPtiming3.clear();
+      hcalTPtiming4.clear();
+      hcalTPtiming5.clear();
+      hcalTPtiming6.clear();
+      hcalTPtiming7.clear();
 
       nECALTP = 0;
       ecalTPieta.clear();
@@ -66,6 +75,15 @@ namespace L1Analysis
     std::vector<float> hcalTPDepth5;
     std::vector<float> hcalTPDepth6;
     std::vector<float> hcalTPDepth7;
+    // Hcal timing
+
+    std::vector<double> hcalTPtiming1;
+    std::vector<double> hcalTPtiming2;
+    std::vector<double> hcalTPtiming3;
+    std::vector<double> hcalTPtiming4;
+    std::vector<double> hcalTPtiming5;
+    std::vector<double> hcalTPtiming6;
+    std::vector<double> hcalTPtiming7;
 
     short nECALTP;
     std::vector<short> ecalTPieta;

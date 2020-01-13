@@ -30,12 +30,12 @@ timing(const QIE11DataFrame& frame) {
   int sig_bx = (int)frame.presamples();
   if(frame[sig_bx].flavor()==0){
     if(frame[sig_bx].tdc()<50) { rt = 0.5*frame[sig_bx].tdc(); } //ft = frame[sig_bx].flavor(); }
-    else if(frame[sig_bx+1].tdc()<50) { rt = 25.0 + 0.5*frame[sig_bx+1].tdc(); }
-    //ft = frame[sig_bx].flavor(); std::cout << "Rising time at TS: SOI+1" << std::endl; }
   } else if(frame[sig_bx].flavor()==3) {
-    if(frame[sig_bx].tdc()<2) { rt = frame[sig_bx].tdc(); }// ft = frame[sig_bx].flavor(); }
-    else if(frame[sig_bx+1].tdc()<2) { rt = 2 + frame[sig_bx+1].tdc(); }
+    if(frame[sig_bx].tdc()<50) { rt = 0.5*frame[sig_bx].tdc(); }
+    //    if(frame[sig_bx].tdc()<2) { rt = frame[sig_bx].tdc(); }// ft = frame[sig_bx].flavor(); }
   }
+
+
     /*
   if (rt > -998 or ft > -998) 
   std::cout << "rise " << rt << " fall " << ft << std::endl; 
@@ -63,6 +63,10 @@ update(HcalUpgradeTriggerPrimitiveDigi& digi, const Sample& sample, int soi, std
       double avg = std::accumulate(rise.begin(), rise.end(), 0.) / rise.size();
       double sqrs = std::accumulate(rise.begin(), rise.end(), 0., [](double x, double y) { return x + y * y; });
 
+      //      std::cout << "rise size = " << rise.size() << std::endl;
+      //      std::cout << "rise(0) = " << rise[0] << std::endl;
+      //      std::cout << "avg     = " << avg << std::endl;
+      //rise_avg.push_back(rise[0]);
       rise_avg.push_back(avg);
       rise_rms.push_back(sqrt(sqrs / rise.size() - avg * avg));
     } else {
