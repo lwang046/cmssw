@@ -19,7 +19,7 @@ L1Analysis::L1AnalysisCaloTP::~L1AnalysisCaloTP()
 
 }
 
-void L1Analysis::L1AnalysisCaloTP::SetHCAL( const HcalTrigPrimDigiCollection& hcalTPs ) {
+void L1Analysis::L1AnalysisCaloTP::SetHCAL( const HcalUpgradeTrigPrimDigiCollection& hcalTPs ) {
 
   if (verbose_) edm::LogInfo("L1Ntuple") << "HCAL TPs : " << hcalTPs.size() << std::endl;
 

@@ -40,8 +40,7 @@ namespace L1Analysis
     }
 
 
-    void SetHCAL(const HcalTrigPrimDigiCollection& hcalTPs);
-
+    void SetHCAL(const HcalUpgradeTrigPrimDigiCollection& hcalTPs);
     void SetECAL(const EcalTrigPrimDigiCollection& ecalTPs);
                    
     void Reset() {tp_.Reset();}

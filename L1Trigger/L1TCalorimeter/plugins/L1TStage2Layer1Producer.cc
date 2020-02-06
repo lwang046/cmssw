@@ -119,7 +119,7 @@ L1TStage2Layer1Producer::L1TStage2Layer1Producer(const edm::ParameterSet& ps) :
   // register what you consume and keep token for later access:
   for (int ibx=0; ibx<bxLast_+1-bxFirst_; ibx++) {
     ecalToken_[ibx] = consumes<EcalTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("ecalToken"));
-    hcalToken_[ibx] = consumes<HcalTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("hcalToken"));
+    hcalToken_[ibx] = consumes<HcalUpgradeTrigPrimDigiCollection>(ps.getParameter<edm::InputTag>("hcalToken"));
   }
 
   // placeholder for the parameters
@@ -172,7 +172,7 @@ L1TStage2Layer1Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     int ibx = bx-bxFirst_;
 
     edm::Handle<EcalTrigPrimDigiCollection> ecalTPs;
-    edm::Handle<HcalTrigPrimDigiCollection> hcalTPs;
+    edm::Handle<HcalUpgradeTrigPrimDigiCollection> hcalTPs;
 
     iEvent.getByToken(hcalToken_[ibx], hcalTPs);
     iEvent.getByToken(ecalToken_[ibx], ecalTPs);
@@ -211,7 +211,7 @@ L1TStage2Layer1Producer::produce(edm::Event& iEvent, const edm::EventSetup& iSet
     }
 
     // loop over HCAL TPs
-    HcalTrigPrimDigiCollection::const_iterator hcalItr;
+    HcalUpgradeTrigPrimDigiCollection::const_iterator hcalItr;
     int nHcal=0;
     for (hcalItr=hcalTPs->begin(); hcalItr!=hcalTPs->end(); ++hcalItr, ++nHcal) {
 
