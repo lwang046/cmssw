@@ -74,7 +74,7 @@ private:
   // ----------member data ---------------------------
 
   edm::EDGetTokenT<EcalTrigPrimDigiCollection> ecalTPSource;
-  edm::EDGetTokenT<HcalTrigPrimDigiCollection> hcalTPSource;
+  edm::EDGetTokenT<HcalUpgradeTrigPrimDigiCollection> hcalTPSource;
   edm::EDPutTokenT<CaloTowerBxCollection> towerPutToken;
   edm::EDPutTokenT<L1CaloRegionCollection> regionPutToken;
 
@@ -117,7 +117,7 @@ private:
 //
 L1TCaloLayer1::L1TCaloLayer1(const edm::ParameterSet& iConfig) :
   ecalTPSource(consumes<EcalTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("ecalToken"))),
-  hcalTPSource(consumes<HcalTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("hcalToken"))),
+  hcalTPSource(consumes<HcalUpgradeTrigPrimDigiCollection>(iConfig.getParameter<edm::InputTag>("hcalToken"))),
   towerPutToken{produces<CaloTowerBxCollection>()},
   regionPutToken{produces<L1CaloRegionCollection>()},
   ePhiMap(72*2, 0),
@@ -170,7 +170,7 @@ L1TCaloLayer1::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   edm::Handle<EcalTrigPrimDigiCollection> ecalTPs;
   iEvent.getByToken(ecalTPSource, ecalTPs);
-  edm::Handle<HcalTrigPrimDigiCollection> hcalTPs;
+  edm::Handle<HcalUpgradeTrigPrimDigiCollection> hcalTPs;
   iEvent.getByToken(hcalTPSource, hcalTPs);
 
   CaloTowerBxCollection towersColl;
@@ -213,8 +213,8 @@ L1TCaloLayer1::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     else if(absCaloEta <= 41) {
       int caloPhi = hcalTp.id().iphi();
       int et = hcalTp.SOI_compressedEt();
-      bool fg  = hcalTp.t0().fineGrain(0);
-      bool fg2 = hcalTp.t0().fineGrain(1);
+      bool fg  = hcalTp.t0().fineGrain();
+      bool fg2 = hcalTp.t0().fineGrain();
       if(caloPhi <= 72) {
         UCTTowerIndex t = UCTTowerIndex(caloEta, caloPhi);
         uint32_t featureBits = 0;
