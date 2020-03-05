@@ -86,7 +86,7 @@ class HcalUpgradeTriggerPrimitiveDigi {
   const HcalUpgradeTriggerPrimitiveSample& t0() const { return m_data[presamples()]; }
   int SOI_fineGrain      () const { return t0().fineGrain      (); }
   int SOI_compressedEt   () const { return t0().compressedEt   (); }
-
+  int SOI_timingbit      () const { return t0().timingbit      (); }
   int SOI_depth_linear(int i) const { return m_depth_data[i - 1]; }
 
   double SOI_rising_avg(int i) const { return m_rising_avg[i - 1]; }
