@@ -11,7 +11,7 @@ class HcalUpgradeTriggerPrimitiveSample {
   HcalUpgradeTriggerPrimitiveSample();
   HcalUpgradeTriggerPrimitiveSample(uint32_t data);
   HcalUpgradeTriggerPrimitiveSample(int encodedEt, int fineGrain, int slb, int slbchan);
-  HcalUpgradeTriggerPrimitiveSample(int timingbit, int slb, int slbchan); 
+  HcalUpgradeTriggerPrimitiveSample(int encodedEt, int fineGrain, int timingbit, int slb, int slbchan); 
  
   uint32_t raw() const {return theSample; }  
 

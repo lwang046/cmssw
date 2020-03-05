@@ -168,8 +168,8 @@ CaloTPGTranscoderULUT::hcalUpgradeCompress(const HcalTrigTowerDetId& id, unsigne
 }
 
 
-HcalUpgradeTriggerPrimitiveSample CaloTPGTranscoderULUT::hcalUpgradeCompress(const HcalTrigTowerDetId& id, int timingbit) const {
-  return HcalUpgradeTriggerPrimitiveSample(timingbit,0,0);
+HcalUpgradeTriggerPrimitiveSample CaloTPGTranscoderULUT::hcalUpgradeCompress(const HcalUpgradeTriggerPrimitiveSample& sample, int timingbit) const {
+  return HcalUpgradeTriggerPrimitiveSample(sample.compressedEt(), sample.fineGrain(), timingbit, sample.slb(), sample.slbChan());
 }
 
 

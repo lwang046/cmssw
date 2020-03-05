@@ -2,6 +2,7 @@
 #define HcalSimAlgos_HcalTimingBit_h
 
 #include <bitset>
+#include "DataFormats/HcalDigi/interface/HcalUpgradeTriggerPrimitiveDigi.h"
 
 class HcalTimingBit {
    public:

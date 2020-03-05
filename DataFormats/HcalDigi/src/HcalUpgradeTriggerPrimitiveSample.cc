@@ -26,12 +26,14 @@ HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encoded
   
 }
 
-HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int timingbit, int slb, int slbchan){
+HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encodedEt, int encodedFG, int timingbit, int slb, int slbchan){
 
-  theSample &= 
-    (((timingbit   )&0xF )<<24  | // timingbit
-    (((slb         )&0x7 )<<18) | // slb          
-    (((slbchan     )&0x3 )<<16) | // slbchan      
+  theSample = 
+    (((timingbit   )&0xF )<<24) | // timingbit
+    (((slb         )&0x7 )<<21) | // slb          
+    (((slbchan     )&0x3 )<<19) | // slbchan      
+    (((encodedFG   )&0xFF)<<8 ) | // fine grain   
+    (((encodedEt   )&0xFF)<<0 );  // et  
 
 }
 
