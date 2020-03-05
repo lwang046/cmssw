@@ -168,6 +168,10 @@ CaloTPGTranscoderULUT::hcalUpgradeCompress(const HcalTrigTowerDetId& id, unsigne
 }
 
 
+HcalUpgradeTriggerPrimitiveSample CaloTPGTranscoderULUT::hcalUpgradeCompress(const HcalTrigTowerDetId& id, int timingbit) const {
+  return HcalUpgradeTriggerPrimitiveSample(timingbit,0,0);
+}
+
 
 double CaloTPGTranscoderULUT::hcaletValue(const int& ieta, const int& iphi, const int& version, const int& compET) const {
   double etvalue = 0.;

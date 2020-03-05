@@ -15,6 +15,7 @@
 
 #include "SimCalorimetry/HcalTrigPrimAlgos/interface/HcalFeatureHFEMBit.h"
 #include "SimCalorimetry/HcalTrigPrimAlgos/interface/HcalFinegrainBit.h"
+#include "SimCalorimetry/HcalTrigPrimAlgos/interface/HcalTimingBit.h"
 
 #include <map>
 #include <vector>
