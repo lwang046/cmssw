@@ -2,9 +2,9 @@
 
 #include <cassert>
 
-std::bitset<4> HcalTimingBit::compute(int ibin, HcalUpgradeTriggerPrimitiveDigi& digi) const
+std::bitset<1> HcalTimingBit::compute(int ibin, HcalUpgradeTriggerPrimitiveDigi& digi) const
 {
-      std::bitset<4> result;
+      std::bitset<1> result;
 
       std::vector<int> energy_depth = digi.getDepthData();
 
@@ -15,9 +15,6 @@ std::bitset<4> HcalTimingBit::compute(int ibin, HcalUpgradeTriggerPrimitiveDigi&
       }
 
       result[0] = 1;
-      result[1] = 0;
-      result[2] = 1;
-      result[3] = 0;
 
       return result;
 }

@@ -9,7 +9,7 @@ class HcalTimingBit {
 
       HcalTimingBit() {};
 
-      std::bitset<4> compute(int ibin, HcalUpgradeTriggerPrimitiveDigi& TPDigi) const;
+      std::bitset<1> compute(int ibin, HcalUpgradeTriggerPrimitiveDigi& TPDigi) const;
 
    private:
 
