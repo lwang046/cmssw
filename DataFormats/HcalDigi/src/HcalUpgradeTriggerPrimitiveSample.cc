@@ -29,7 +29,7 @@ HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encoded
 HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encodedEt, int encodedFG, int timingbit, int slb, int slbchan){
 
   theSample = 
-    (((timingbit   )&0x1 )<<24) | // timingbit
+    (((timingbit   )&0x7 )<<24) | // timingbit
     (((slb         )&0x7 )<<21) | // slb          
     (((slbchan     )&0x3 )<<19) | // slbchan      
     (((encodedFG   )&0xFF)<<8 ) | // fine grain   
