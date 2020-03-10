@@ -26,6 +26,7 @@ namespace L1Analysis
       hcalTPet.clear();
       hcalTPcompEt.clear();
       hcalTPfineGrain.clear();
+      hcalTPTimingBit.clear();
       // Hcal depth info
       hcalTPnDepths.clear();
       hcalTPDepth1.clear();
@@ -36,7 +37,6 @@ namespace L1Analysis
       hcalTPDepth6.clear();
       hcalTPDepth7.clear();
       // Hcal timing info
-
       hcalTPtiming1.clear();
       hcalTPtiming2.clear();
       hcalTPtiming3.clear();
@@ -66,6 +66,7 @@ namespace L1Analysis
     std::vector<float> hcalTPet;
     std::vector<short> hcalTPcompEt;
     std::vector<short> hcalTPfineGrain;
+    std::vector<short> hcalTPTimingBit;
     // Hcal dpeth
     std::vector<short> hcalTPnDepths;
     std::vector<float> hcalTPDepth1;
@@ -76,7 +77,6 @@ namespace L1Analysis
     std::vector<float> hcalTPDepth6;
     std::vector<float> hcalTPDepth7;
     // Hcal timing
-
     std::vector<double> hcalTPtiming1;
     std::vector<double> hcalTPtiming2;
     std::vector<double> hcalTPtiming3;

@@ -40,6 +40,7 @@ void L1Analysis::L1AnalysisCaloTP::SetHCAL( const HcalUpgradeTrigPrimDigiCollect
     if (hcalScale_!=nullptr) et = hcalScale_->et( compEt, absIeta, sign );
 
     unsigned short fineGrain = (unsigned short) hcalTPs[i].SOI_fineGrain();
+    unsigned short TimingBit = (unsigned short) hcalTPs[i].SOI_timingbit();
 
     tp_.hcalTPieta.push_back( ieta );
     tp_.hcalTPCaliphi.push_back( cal_iphi );
@@ -47,6 +48,7 @@ void L1Analysis::L1AnalysisCaloTP::SetHCAL( const HcalUpgradeTrigPrimDigiCollect
     tp_.hcalTPet.push_back( et );
     tp_.hcalTPcompEt.push_back( compEt );
     tp_.hcalTPfineGrain.push_back( fineGrain );
+    tp_.hcalTPTimingBit.push_back( TimingBit );
     tp_.nHCALTP++;
 
   }
