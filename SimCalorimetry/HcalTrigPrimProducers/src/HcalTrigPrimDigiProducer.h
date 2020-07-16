@@ -9,8 +9,10 @@
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
 #include <vector>
 
-class HcalTrigPrimDigiProducer : public edm::stream::EDProducer<> {
+class HcalTrigPrimDigiProducer : public edm::stream::EDProducer<>
+{
 public:
+
   explicit HcalTrigPrimDigiProducer(const edm::ParameterSet& ps);
   ~HcalTrigPrimDigiProducer() override {}
 
@@ -18,6 +20,7 @@ public:
   void produce(edm::Event& e, const edm::EventSetup& c) override;
 
 private:
+
   HcalTriggerPrimitiveAlgo theAlgo_;
 
   /// input tags for HCAL digis
@@ -34,12 +37,12 @@ private:
   edm::InputTag inputTagFEDRaw_;
   edm::EDGetTokenT<FEDRawDataCollection> tok_raw_;
   double MinLongEnergy_, MinShortEnergy_, LongShortSlope_, LongShortOffset_;
-
+  
   bool runZS_;
 
   bool runFrontEndFormatError_;
 
-  bool upgrade_;
+  bool upgrade_,upgrade2_;
   bool legacy_;
 
   bool HFEMB_;
@@ -47,3 +50,4 @@ private:
 };
 
 #endif
+
