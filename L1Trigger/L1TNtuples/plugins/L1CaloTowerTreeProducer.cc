@@ -214,7 +214,8 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
       double et = decoder->hcaletValue(itr.id(), itr.t0());
 
       unsigned short fineGrain = (unsigned short) itr.SOI_fineGrain();
-      
+      unsigned short TimingBit = (unsigned short) itr.SOI_timingbit();
+     
       unsigned short nDepths = (unsigned short) itr.getDepthData().size();
       float et_sum = 0;
 
@@ -240,7 +241,7 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	  caloTPData_->hcalTPDepth1.push_back( Depth1*DepthScale );
 
 	  double t1 = itr.SOI_rising_avg(2);
-	  std::cout << "Timing1 = " << t1 << std::endl;
+	  //	  std::cout << "Timing1 = " << t1 << std::endl;
 	  if(t1>0) caloTPData_->hcalTPtiming1.push_back( t1 ); //itr.SOI_rising_avg(1) );
 	  else caloTPData_->hcalTPtiming1.push_back( -1.0 );
 	}
@@ -254,7 +255,7 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	  caloTPData_->hcalTPDepth2.push_back( Depth2*DepthScale );
 
 	  double t2 = itr.SOI_rising_avg(3); 
-	  std::cout << "Timing2 = " << t2 << std::endl;
+	  //	  std::cout << "Timing2 = " << t2 << std::endl;
 	  if(t2>0) caloTPData_->hcalTPtiming2.push_back( t2 ); //itr.SOI_rising_avg(1) ); 
 	  else caloTPData_->hcalTPtiming2.push_back( -1.0 ); 
 	  //	  caloTPData_->hcalTPtiming2.push_back( itr.SOI_rising_avg(2) ); 
@@ -340,13 +341,14 @@ L1CaloTowerTreeProducer::analyze(const edm::Event& iEvent, const edm::EventSetup
 	caloTPData_->hcalTPet.push_back( et );
 	caloTPData_->hcalTPcompEt.push_back( compEt );
 	caloTPData_->hcalTPfineGrain.push_back( fineGrain );
+        caloTPData_->hcalTPTimingBit.push_back( TimingBit );
 	caloTPData_->nHCALTP++;
       }
     }
     
   }
   else {
-    edm::LogWarning("L1TNtuple") << "HCAL TPs not found, branch will not be filled";
+    //edm::LogWarning("L1TNtuple") << "HCAL TPs not found, branch will not be filled";
   }
   
   // do L1 towers

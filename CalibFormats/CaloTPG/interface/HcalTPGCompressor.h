@@ -15,6 +15,7 @@ public:
   HcalTPGCompressor(const CaloTPGTranscoder* coder);
   void compress(const IntegerCaloSamples& ics, const std::vector<int>& fineGrain, HcalTriggerPrimitiveDigi& digi) const;
   void compress(const IntegerCaloSamples& ics, const std::vector<int>& fineGrain, HcalUpgradeTriggerPrimitiveDigi& digi) const;
+  void compress(const std::vector<int>& timingbit, HcalUpgradeTriggerPrimitiveDigi& digi) const;
   HcalTriggerPrimitiveSample compress(const HcalTrigTowerDetId& id, unsigned int sample, bool fineGrain) const;
 private:
   const CaloTPGTranscoder* coder_;

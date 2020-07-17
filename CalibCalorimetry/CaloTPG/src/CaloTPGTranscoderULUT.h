@@ -7,7 +7,7 @@
 #include "CalibFormats/CaloTPG/interface/CaloTPGTranscoder.h"
 #include "Geometry/CaloTopology/interface/HcalTopology.h"
 #include "CondFormats/HcalObjects/interface/HcalLutMetadata.h"
-
+#include "DataFormats/HcalDigi/interface/HcalUpgradeTriggerPrimitiveSample.h"
 
 /** \class CaloTPGTranscoderULUT
   *  
@@ -23,6 +23,7 @@ public:
   ~CaloTPGTranscoderULUT() override;
   HcalTriggerPrimitiveSample hcalCompress(const HcalTrigTowerDetId& id, unsigned int sample, int fineGrain) const override;
   HcalUpgradeTriggerPrimitiveSample hcalUpgradeCompress(const HcalTrigTowerDetId& id, unsigned int sample, int fineGrain) const;
+  HcalUpgradeTriggerPrimitiveSample hcalUpgradeCompress(const HcalUpgradeTriggerPrimitiveSample& sample, int timingbit) const;
   EcalTriggerPrimitiveSample ecalCompress(const EcalTrigTowerDetId& id, unsigned int sample, bool fineGrain) const override;
 
   void rctEGammaUncompress(const HcalTrigTowerDetId& hid, const HcalTriggerPrimitiveSample& hc,

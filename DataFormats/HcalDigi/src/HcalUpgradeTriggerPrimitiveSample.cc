@@ -19,11 +19,22 @@ HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(uint32_t da
 HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encodedEt, int encodedFG, int slb, int slbchan){
   
   theSample = 
-    (((slb         )&0x7 )<<18) | // slb          
-    (((slbchan     )&0x3 )<<16) | // slbchan      
+    (((slb         )&0x7 )<<21) | // slb          
+    (((slbchan     )&0x3 )<<19) | // slbchan      
     (((encodedFG   )&0xFF)<<8 ) | // fine grain   
     (((encodedEt   )&0xFF)<<0 );  // et           
   
+}
+
+HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encodedEt, int encodedFG, int timingbit, int slb, int slbchan){
+
+  theSample = 
+    (((timingbit   )&0x7 )<<24) | // timingbit
+    (((slb         )&0x7 )<<21) | // slb          
+    (((slbchan     )&0x3 )<<19) | // slbchan      
+    (((encodedFG   )&0xFF)<<8 ) | // fine grain   
+    (((encodedEt   )&0xFF)<<0 );  // et  
+
 }
 
 //------------------------------------------------------
@@ -32,6 +43,7 @@ HcalUpgradeTriggerPrimitiveSample::HcalUpgradeTriggerPrimitiveSample(int encoded
 
 std::ostream& operator<<(std::ostream& s, const HcalUpgradeTriggerPrimitiveSample& samp) {
   return s << "Et="      << samp.compressedEt()    << ", " 
-	   << "FG="      << samp.fineGrain() ;
+	   << "FG="      << samp.fineGrain()       << ", "
+	   << "timingbit=" << samp.timingbit() ;
 }
 

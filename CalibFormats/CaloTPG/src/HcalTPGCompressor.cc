@@ -18,6 +18,11 @@ void HcalTPGCompressor::compress(const IntegerCaloSamples& ics, const std::vecto
     digi.setSample(i,coder_->hcalUpgradeCompress(ics.id(),ics[i],fineGrain[i]));
 }
 
+void HcalTPGCompressor::compress( const std::vector<int>& timingbit, HcalUpgradeTriggerPrimitiveDigi& digi) const {
+  for (int i=0; i<digi.size(); i++)
+    digi.setSample(i,coder_->hcalUpgradeCompress(digi[i],timingbit[i]));
+}
+
 HcalTriggerPrimitiveSample HcalTPGCompressor::compress(const HcalTrigTowerDetId& id, unsigned int sample, bool fineGrain) const {
   return coder_->hcalCompress(id, sample, fineGrain);
 }

@@ -677,6 +677,8 @@ HcalTriggerPrimitiveAlgo::analyzeQIE11(IntegerCaloSamples& samples, HcalUpgradeT
    }
 
    std::vector<int> finegrain(tpSamples,false);
+   const HcalTimingBit ft_algo;
+   std::vector<int> timingbit(tpSamples,false); 
 
    IntegerCaloSamples output(samples.id(), tpSamples);
    output.setPresamples(tpPresamples);
@@ -719,8 +721,13 @@ HcalTriggerPrimitiveAlgo::analyzeQIE11(IntegerCaloSamples& samples, HcalUpgradeT
       finegrain[ibin] = fg_algo.compute(msb[idx]).to_ulong();
    }
    outcoder_->compress(output, finegrain, result);
-
    update(result, theDepthMap[samples.id()], numberOfPresamples_,depth_sums); 
+
+   for (int ibin = 0; ibin < tpSamples; ++ibin) {
+      timingbit[ibin] = ft_algo.compute(ibin, result).to_ulong();
+   }
+   outcoder_->compress(timingbit, result);
+
 }
 
 void HcalTriggerPrimitiveAlgo::analyzeHF(IntegerCaloSamples & samples, HcalTriggerPrimitiveDigi & result, const int hf_lumi_shift) {
