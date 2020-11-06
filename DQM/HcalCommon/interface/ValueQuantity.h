@@ -66,6 +66,9 @@ namespace hcaldqm {
       fCapidMinusBXmod4,
       fBX_36,
       fADC_256_4,  // ADC from 0-255, with 4 ADC granularity
+      fDiffRatio, // (v2-v1)/v1
+      fCPUenergy,
+      fGPUenergy,
     };
     const std::map<ValueQuantityType, std::string> name_value = {
         {fN, "N"},
@@ -126,6 +129,9 @@ namespace hcaldqm {
         {fCapidMinusBXmod4, "(CapId - BX) % 4"},
         {fBX_36, "BX"},
         {fADC_256_4, "ADC"},
+        {fDiffRatio, "(GPU energy - CPU energy)/CPU energy"},
+        {fCPUenergy, "CPU energy"},
+        {fGPUenergy, "GPU energy"},
     };
     const std::map<ValueQuantityType, double> min_value = {
         {fN, -0.05},
@@ -186,6 +192,9 @@ namespace hcaldqm {
         {fCapidMinusBXmod4, -0.5},
         {fBX_36, -0.5},
         {fADC_256_4, -0.5},
+        {fDiffRatio, -2.5},
+        {fCPUenergy, 0},
+        {fGPUenergy, 0},
     };
     const std::map<ValueQuantityType, double> max_value = {
         {fN, 1000},
@@ -246,6 +255,9 @@ namespace hcaldqm {
         {fCapidMinusBXmod4, 3.5},
         {fBX_36, 3564. - 0.5},
         {fADC_256_4, 255},
+        {fDiffRatio, 2.5},
+        {fCPUenergy, 200},
+        {fGPUenergy, 200},
     };
     const std::map<ValueQuantityType, int> nbins_value = {
         {fN, 200},
@@ -305,6 +317,9 @@ namespace hcaldqm {
         {fCapidMinusBXmod4, 4},
         {fBX_36, 99},
         {fADC_256_4, 64},
+        {fDiffRatio, 50},
+        {fCPUenergy, 2000},
+        {fGPUenergy, 2000},
     };
     class ValueQuantity : public Quantity {
     public:

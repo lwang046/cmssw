@@ -38,11 +38,13 @@ protected:
   void _resetMonitors(hcaldqm::UpdateFreq) override;
 
   edm::InputTag _tagHBHE;
+  edm::InputTag _tagHBHE_aux;
   edm::InputTag _tagHO;
   edm::InputTag _tagHF;
   edm::InputTag _tagPreHF;
   bool _hfPreRecHitsAvailable;
   edm::EDGetTokenT<HBHERecHitCollection> _tokHBHE;
+  edm::EDGetTokenT<HBHERecHitCollection> _tokHBHE_aux;
   edm::EDGetTokenT<HORecHitCollection> _tokHO;
   edm::EDGetTokenT<HFRecHitCollection> _tokHF;
   edm::EDGetTokenT<HFPreRecHitCollection> _tokPreHF;
@@ -77,6 +79,10 @@ protected:
 
   //	Timing vs Energy. No Summary Generation
   hcaldqm::Container2D _cTimingvsEnergy_SubdetPM;
+
+  //    GPU reco test verification
+  hcaldqm::Container2D _cEnergyGPUvsCPU_Subdet;
+  hcaldqm::Container1D _cEnergyDiffGPUCPU_Subdet;
 
   //	Timing. HBHE Partition is used for TCDS shift monitoring
   hcaldqm::Container1D _cTimingCut_SubdetPM;
