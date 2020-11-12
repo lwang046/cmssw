@@ -318,8 +318,8 @@ namespace hcaldqm {
         {fBX_36, 99},
         {fADC_256_4, 64},
         {fDiffRatio, 50},
-        {fCPUenergy, 2000},
-        {fGPUenergy, 2000},
+        {fCPUenergy, 1000},
+        {fGPUenergy, 1000},
     };
     class ValueQuantity : public Quantity {
     public:
