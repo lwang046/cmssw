@@ -7,7 +7,7 @@ using namespace hcaldqm::filter;
 
 RecHitTask::RecHitTask(edm::ParameterSet const& ps) : DQTask(ps) {
   _tagHBHE = ps.getUntrackedParameter<edm::InputTag>("tagHBHE", edm::InputTag("hbhereco"));
-  _tagHBHE_aux = ps.getUntrackedParameter<edm::InputTag>("tagHBHE_aux", edm::InputTag("hbhereco"));
+  _tagHBHE_aux = ps.getUntrackedParameter<edm::InputTag>("tagHBHE_aux", edm::InputTag("hcalCPURecHitsProducer:recHitsLegacyHBHE"));
   _tagHO = ps.getUntrackedParameter<edm::InputTag>("tagHO", edm::InputTag("horeco"));
   _tagHF = ps.getUntrackedParameter<edm::InputTag>("tagHF", edm::InputTag("hfreco"));
   _tagPreHF = ps.getUntrackedParameter<edm::InputTag>("tagPreHF", edm::InputTag(""));

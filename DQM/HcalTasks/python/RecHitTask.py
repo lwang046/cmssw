@@ -15,7 +15,7 @@ recHitTask = DQMEDAnalyzer(
 
 	#	tags
 	tagHBHE = cms.untracked.InputTag("hbhereco"),
-        tagHBHE_aux = cms.untracked.InputTag("hbherecoAUX"),
+        tagHBHE_aux = cms.untracked.InputTag("hcalCPURecHitsProducer:recHitsLegacyHBHE"),
 	tagHO = cms.untracked.InputTag("horeco"),
 	tagHF = cms.untracked.InputTag("hfreco"),
 	tagRaw = cms.untracked.InputTag('rawDataCollector'),

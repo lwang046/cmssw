@@ -68,13 +68,19 @@ process.dqmSaverPB.tag = "HcalReco"
 process.dqmSaverPB.runNumber = options.runNumber
 process = customise(process)
 process.DQMStore.verbose = 0
-if not useFileInput and not unitTest:
-	process.source.minEventsPerLumi = 5
+#if not useFileInput and not unitTest:
+#	process.source.minEventsPerLumi = 5
 
 #	Note, runType is obtained after importing DQM-related modules
 #	=> DQM-dependent
 runType			= process.runType.getRunType()
 print(debugstr, "Running with run type= ", runType)
+
+
+# import of standard configurations
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('HeterogeneousCore.CUDAServices.CUDAService_cfi')
+
 
 #-------------------------------------
 #	CMSSW/Hcal non-DQM Related Module import
@@ -85,6 +91,49 @@ process.load("EventFilter.HcalRawToDigi.HcalRawToDigi_cfi")
 process.load("SimCalorimetry.HcalTrigPrimProducers.hcaltpdigi_cff")
 process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")
 process.load('CondCore.CondDB.CondDB_cfi')
+
+#-----------------------------------------
+# CMSSW/Hcal GPU related files
+#-----------------------------------------
+
+process.load("RecoLocalCalo.HcalRecProducers.hbheRecHitProducerGPUTask_cff")
+process.load("RecoLocalCalo.HcalRecProducers.hcalCPURecHitsProducer_cfi")
+process.hcalCPURecHitsProducer.recHitsM0LabelIn = cms.InputTag("hbheRecHitProducerGPU","")
+process.hcalCPURecHitsProducer.recHitsM0LabelOut = cms.string("")
+
+#-----------------------------------------
+# Temporary customization (things not implemented on the GPU)
+#-----------------------------------------
+
+## the one below is taken directly from the DB, regard M0
+#process.hbheprereco.algorithm.__setattr__('correctForPhaseContainment', cms.bool(False))
+
+## do always 8 pulse
+process.hbheprereco.algorithm.__setattr__('chiSqSwitch', cms.double(-1))
+
+## to match hard coded setting (will be fixed on CPU)
+process.hbheprereco.algorithm.__setattr__('nMaxItersMin',cms.int32(50))
+
+#-----------------------------------------
+# Final Custmization for Run3
+#-----------------------------------------
+
+# we will not run arrival Time at HLT
+process.hbheprereco.algorithm.__setattr__('calculateArrivalTime',cms.bool(False))
+
+## we do not need this
+process.hbheprereco.algorithm.__setattr__('applyLegacyHBMCorrection', cms.bool(False))
+
+# we only runMahi at HLT
+process.hbheprereco.algorithm.__setattr__('useM3',cms.bool(False))
+
+# we will not have the HPD noise flags in Run3, as will be all siPM
+process.hbheprereco.setLegacyFlagsQIE8 = cms.bool(False)
+process.hbheprereco.setNegativeFlagsQIE8 = cms.bool(False)
+process.hbheprereco.setNoiseFlagsQIE8 = cms.bool(False)
+process.hbheprereco.setPulseShapeFlagsQIE8 = cms.bool(False)
+
+
 
 #-------------------------------------
 #	CMSSW/Hcal non-DQM Related Module Settings
@@ -172,6 +221,12 @@ process.recoPath = cms.Path(
     *process.hbheprereco
 )
 
+## hcalCPUDigisProducer <-- this convert the GPU digi on cpu (for dqm)
+process.recoPathGPU = cms.Path(
+    process.hbheRecHitProducerGPUSequence
+    *process.hcalCPURecHitsProducer
+)
+
 process.dqmPath = cms.Path(
 		process.dqmEnv
 		*process.dqmSaver
@@ -181,6 +236,7 @@ process.dqmPath = cms.Path(
 process.schedule = cms.Schedule(
 		process.digiPath,
 		process.recoPath,
+		process.recoPathGPU,
 		process.tasksPath,
 		process.harvestingPath,
 		process.dqmPath
