@@ -8,12 +8,14 @@ using namespace hcaldqm::filter;
 RecHitTask::RecHitTask(edm::ParameterSet const& ps)
     : DQTask(ps), hcalDbServiceToken_(esConsumes<HcalDbService, HcalDbRecord, edm::Transition::BeginRun>()) {
   _tagHBHE = ps.getUntrackedParameter<edm::InputTag>("tagHBHE", edm::InputTag("hbhereco"));
+  _tagHBHE_GPU = ps.getUntrackedParameter<edm::InputTag>("tagHBHE_GPU", edm::InputTag("hltHbhereco@cuda"));
   _tagHO = ps.getUntrackedParameter<edm::InputTag>("tagHO", edm::InputTag("horeco"));
   _tagHF = ps.getUntrackedParameter<edm::InputTag>("tagHF", edm::InputTag("hfreco"));
   _tagPreHF = ps.getUntrackedParameter<edm::InputTag>("tagPreHF", edm::InputTag(""));
   _hfPreRecHitsAvailable = ps.getUntrackedParameter<bool>("hfPreRecHitsAvailable", false);
 
   _tokHBHE = consumes<HBHERecHitCollection>(_tagHBHE);
+  _tokHBHE_GPU = consumes<HBHERecHitCollection>(_tagHBHE_GPU);
   _tokHO = consumes<HORecHitCollection>(_tagHO);
   _tokHF = consumes<HFRecHitCollection>(_tagHF);
   _tokPreHF = consumes<HFPreRecHitCollection>(_tagPreHF);
@@ -100,6 +102,21 @@ RecHitTask::RecHitTask(edm::ParameterSet const& ps)
                                       new hcaldqm::quantity::LumiSection(_maxLS),
                                       new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_ns),
                                       0);
+
+  //    GPU test
+  _cEnergyGPUvsCPU_Subdet.initialize(_name,
+                                     "EnergyGPUvsCPU",
+                                     hcaldqm::hashfunctions::fSubdet,
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fCPUenergy, true),
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fGPUenergy, true),
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                     0);
+  _cEnergyDiffGPUCPU_Subdet.initialize(_name,
+                                       "EnergyDiffGPUCPU",
+                                       hcaldqm::hashfunctions::fSubdet,
+                                       new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fDiffRatio),
+                                       new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN, true),
+                                       0);
 
   //	Occupancy
   _cOccupancy_depth.initialize(_name,
@@ -390,6 +407,10 @@ RecHitTask::RecHitTask(edm::ParameterSet const& ps)
     _cTimingCutvsLS_FED.book(ib, _emap, _subsystem);
   }
 
+  //    GPU test
+  _cEnergyGPUvsCPU_Subdet.book(ib, _emap, _subsystem);
+  _cEnergyDiffGPUCPU_Subdet.book(ib, _emap, _subsystem);
+
   //	Occupancy
   _cOccupancy_depth.book(ib, _emap, _subsystem);
   if (_ptype != fOffline) {  // hidefed2crate
@@ -473,11 +494,15 @@ RecHitTask::RecHitTask(edm::ParameterSet const& ps)
 
 /* virtual */ void RecHitTask::_process(edm::Event const& e, edm::EventSetup const&) {
   edm::Handle<HBHERecHitCollection> chbhe;
+  edm::Handle<HBHERecHitCollection> chbhe_GPU;
   edm::Handle<HORecHitCollection> cho;
   edm::Handle<HFRecHitCollection> chf;
 
   if (!(e.getByToken(_tokHBHE, chbhe)))
     _logger.dqmthrow("Collection HBHERecHitCollection not available " + _tagHBHE.label() + " " + _tagHBHE.instance());
+  if (!(e.getByToken(_tokHBHE_GPU, chbhe_GPU)))
+    _logger.dqmthrow("GPU Collection HBHERecHitCollection not available " + _tagHBHE_GPU.label() + " " +
+                     _tagHBHE_GPU.instance());
   if (!(e.getByToken(_tokHO, cho)))
     _logger.dqmthrow("Collection HORecHitCollection not available " + _tagHO.label() + " " + _tagHO.instance());
   if (!(e.getByToken(_tokHF, chf)))
@@ -510,6 +535,9 @@ RecHitTask::RecHitTask(edm::ParameterSet const& ps)
   int nChsHE = 0;
   int nChsHBCut = 0;
   int nChsHECut = 0;
+
+  std::map<HcalDetId, double> _mRecHitEnergy;
+
   for (HBHERecHitCollection::const_iterator it = chbhe->begin(); it != chbhe->end(); ++it) {
     double energy = it->energy();
     double timing = it->time();
@@ -517,6 +545,12 @@ RecHitTask::RecHitTask(edm::ParameterSet const& ps)
     //	Explicit check on the DetIds present in the Collection
     HcalDetId did = it->id();
     uint32_t rawid = _ehashmap.lookup(did);
+
+    if (_mRecHitEnergy.find(did) == _mRecHitEnergy.end())
+      _mRecHitEnergy.insert(std::make_pair(did, energy));
+    else
+      edm::LogError("HcalDQM|RechitTask") << "Duplicate Rechit from the same HcalDetId";
+
     /*
          * Needs to be removed as DetIds that belong to the HEP17 after combination
          * are not present in the emap
@@ -630,6 +664,20 @@ RecHitTask::RecHitTask(edm::ParameterSet const& ps)
     }
     did.subdet() == HcalBarrel ? nChsHB++ : nChsHE++;
   }
+
+  for (HBHERecHitCollection::const_iterator it = chbhe_GPU->begin(); it != chbhe_GPU->end(); ++it) {
+    double energy = it->energy();
+    HcalDetId did = it->id();
+
+    if (_mRecHitEnergy.find(did) != _mRecHitEnergy.end()) {
+      _cEnergyGPUvsCPU_Subdet.fill(did, _mRecHitEnergy[did], energy);
+      _cEnergyDiffGPUCPU_Subdet.fill(did, (energy - _mRecHitEnergy[did]) / _mRecHitEnergy[did]);
+      _mRecHitEnergy.erase(did);
+    } else
+      edm::LogError("HcalDQM|RechitTask") << "GPU Rechit id not found in CPU Rechit id collection";
+  }
+  if (_mRecHitEnergy.size() != 0)
+    edm::LogError("HcalDQM|RechitTask") << "CPU Rechit id not found in GPU Rechit id collection";
 
   if (rawidHBValid != 0 && rawidHEValid != 0) {
     _cOccupancyvsLS_Subdet.fill(HcalDetId(rawidHBValid), _currentLS, nChsHB);

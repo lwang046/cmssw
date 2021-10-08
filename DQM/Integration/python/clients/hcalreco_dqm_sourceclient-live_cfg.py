@@ -70,7 +70,8 @@ process = customise(process)
 process.DQMStore.verbose = 0
 if not unitTest and not useFileInput:
   if not options.BeamSplashRun :
-    process.source.minEventsPerLumi = 5
+    pass
+    #process.source.minEventsPerLumi = 5
 
 #	Note, runType is obtained after importing DQM-related modules
 #	=> DQM-dependent
@@ -171,6 +172,7 @@ process.recoPath = cms.Path(
     *process.hfprereco
     *process.hfreco
     *process.hbheprereco
+    *process.hltHbhereco
 )
 
 process.dqmPath = cms.Path(
