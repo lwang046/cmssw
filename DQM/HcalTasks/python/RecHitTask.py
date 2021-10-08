@@ -14,8 +14,8 @@ recHitTask = DQMEDAnalyzer(
 	subsystem = cms.untracked.string("Hcal"),
 
 	#	tags
-	tagHBHE = cms.untracked.InputTag("hbhereco"),
-	tagHBHE_GPU = cms.InputTag("hltHbhereco@cuda"),
+	tagHBHE = cms.untracked.InputTag("hltHbhereco@cpu"),
+	tagHBHE_GPU = cms.untracked.InputTag("hltHbhereco@cuda"),
 	tagHO = cms.untracked.InputTag("horeco"),
 	tagHF = cms.untracked.InputTag("hfreco"),
 	tagRaw = cms.untracked.InputTag('rawDataCollector'),

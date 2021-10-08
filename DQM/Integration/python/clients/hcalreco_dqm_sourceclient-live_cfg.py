@@ -172,7 +172,6 @@ process.recoPath = cms.Path(
     *process.hfprereco
     *process.hfreco
     *process.hbheprereco
-    *process.hltHbhereco
 )
 
 process.dqmPath = cms.Path(
