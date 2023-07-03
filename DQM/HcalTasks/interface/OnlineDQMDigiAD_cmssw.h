@@ -70,27 +70,30 @@ public:
            * @param flagDecisionThr: The anomaly detection decision threshold, decrease to increase sensitivity
            * @return ad_model_output_vectors: the vectors of multidimensional arrays: output_data_0, output_data_1, ...
            */
-  std::vector<std::vector<float>> Inference_CMSSW(const std::vector<std::vector<float>> &digiHcal2DHist_depth_1,
+  std::vector<std::vector<float>> Inference_CMSSW(std::string subsystem_name,
+                                                  const std::vector<std::vector<float>> &digiHcal2DHist_depth_1,
                                                   const std::vector<std::vector<float>> &digiHcal2DHist_depth_2,
                                                   const std::vector<std::vector<float>> &digiHcal2DHist_depth_3,
                                                   const std::vector<std::vector<float>> &digiHcal2DHist_depth_4,
                                                   const std::vector<std::vector<float>> &digiHcal2DHist_depth_5,
                                                   const std::vector<std::vector<float>> &digiHcal2DHist_depth_6,
                                                   const std::vector<std::vector<float>> &digiHcal2DHist_depth_7,
-                                                  const float &LS_numEvents,
-                                                  const float &flagDecisionThr = 20);
+                                                  const float LS_numEvents,
+                                                  const float flagDecisionThr = 20);
+
   /**
         @brief Converts 1D serialized vector output of the onnx into 3d hcal-hehp vector
         @param ad_model_output_vectors: vector of 3D histogram maps the hcal-hehb, each vector output from the onnx. e.g 3d map of anomaly score and 3d map of anomaly flag or label
         @param selOutputIdx: index to select of the onnx output. e.g. 5 is the anomaly score and 7 is the anomaly flag (1 is with anomaly, 0 is healthy)
         @return ad_model_output_vectors: the vectors of multidimensional arrays: output_data_0, output_data_1, ...
        */
-
   std::vector<std::vector<std::vector<float>>> ONNXOutputToDQMHistMap(
       const std::vector<std::vector<float>> &ad_model_output_vectors, const int selOutputIdx = 7);
 
 private:
   // onnx session
+  std::string hcal_subsystem_name;
+  std::vector<std::string> hcal_modeled_systems = {"he", "hb"};
   std::unique_ptr<ONNXRuntime> ort_mSession = NULL;
   std::string model_path;  // onnx model path
 
@@ -161,15 +164,10 @@ private:
 
   /**
        * @brief Prepares model input serialized dqm histogram from 2D histogram inputs from the cmssw
-       *  @param digiHcal2DHist_depth_i: 2D histogram digioccupancy of the ith depth of the hcal
+       *  @param digiHcal2DHist_depth_all: 3D vector (depth[ieta[iphi]]) of combined 2D histogram digioccupancy of the any depth of the hcal 
        */
-  std::vector<float> PrepareONNXDQMMapVectors(const std::vector<std::vector<float>> &digiHcal2DHist_depth_1,
-                                              const std::vector<std::vector<float>> &digiHcal2DHist_depth_2,
-                                              const std::vector<std::vector<float>> &digiHcal2DHist_depth_3,
-                                              const std::vector<std::vector<float>> &digiHcal2DHist_depth_4,
-                                              const std::vector<std::vector<float>> &digiHcal2DHist_depth_5,
-                                              const std::vector<std::vector<float>> &digiHcal2DHist_depth_6,
-                                              const std::vector<std::vector<float>> &digiHcal2DHist_depth_7);
+  std::vector<float> PrepareONNXDQMMapVectors(std::vector<std::vector<std::vector<float>>> &digiHcal2DHist_depth_all);
+  void IsModelExist(std::string subsystem_name);
 };
 
 #endif  // OnlineDQMDigiAD_cmssw_H_

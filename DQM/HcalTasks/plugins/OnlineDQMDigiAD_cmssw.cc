@@ -21,6 +21,7 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <algorithm>
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestAssert.h>
 
@@ -45,12 +46,18 @@ OnlineDQMDigiAD::OnlineDQMDigiAD(const std::string &modelFilepath, Backend backe
   // std::string model_path = edm::FileInPath(modelFilepath).fullPath();
   model_path = edm::FileInPath(modelFilepath).fullPath();
 
-  // ort_mSession = ONNXRuntime(model_path, &session_options);
+  //ort_mSession = ONNXRuntime(model_path, &session_options);
   auto uOrtSession = std::make_unique<ONNXRuntime>(model_path, &session_options);
   ort_mSession = std::move(uOrtSession);
 
   std::cout << "******* model loading is success *******" << std::endl;
   // output_names = {"target_data", "pred_data", "pred_err_spatial_scaled", "pred_err_window_spatial_scaled", "pred_err_spatial_scaled_aml", "red_err_window_spatial_scaled_aml"};
+}
+
+void OnlineDQMDigiAD::IsModelExist(std::string subsystem_name) {
+  assert(std::find(hcal_modeled_systems.begin(), hcal_modeled_systems.end(), subsystem_name) !=
+         hcal_modeled_systems.end());
+  std::cout << "onnx model integration is supported for the selected " << subsystem_name << " system!" << std::endl;
 }
 
 void OnlineDQMDigiAD::InitializeState() {
@@ -110,49 +117,15 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Map1DTo2DVector(const std::vect
 }
 
 std::vector<float> OnlineDQMDigiAD::PrepareONNXDQMMapVectors(
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_1,
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_2,
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_3,
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_4,
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_5,
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_6,
-    const std::vector<std::vector<float>> &digiHcal2DHist_depth_7) {
+    std::vector<std::vector<std::vector<float>>> &digiHcal2DHist_depth_all) {
   std::vector<float> digi3DHistVector_serialized;
 
-  std::vector<float> digiHcalDHist_serialized_depth_1 = Serialize2DVector(digiHcal2DHist_depth_1);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_1.begin(),
-                                     digiHcalDHist_serialized_depth_1.end());
-
-  std::vector<float> digiHcalDHist_serialized_depth_2 = Serialize2DVector(digiHcal2DHist_depth_2);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_2.begin(),
-                                     digiHcalDHist_serialized_depth_2.end());
-
-  std::vector<float> digiHcalDHist_serialized_depth_3 = Serialize2DVector(digiHcal2DHist_depth_3);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_3.begin(),
-                                     digiHcalDHist_serialized_depth_3.end());
-
-  std::vector<float> digiHcalDHist_serialized_depth_4 = Serialize2DVector(digiHcal2DHist_depth_4);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_4.begin(),
-                                     digiHcalDHist_serialized_depth_4.end());
-
-  std::vector<float> digiHcalDHist_serialized_depth_5 = Serialize2DVector(digiHcal2DHist_depth_5);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_5.begin(),
-                                     digiHcalDHist_serialized_depth_5.end());
-
-  std::vector<float> digiHcalDHist_serialized_depth_6 = Serialize2DVector(digiHcal2DHist_depth_6);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_6.begin(),
-                                     digiHcalDHist_serialized_depth_6.end());
-
-  std::vector<float> digiHcalDHist_serialized_depth_7 = Serialize2DVector(digiHcal2DHist_depth_7);
-  digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
-                                     digiHcalDHist_serialized_depth_7.begin(),
-                                     digiHcalDHist_serialized_depth_7.end());
+  for (std::vector<std::vector<float>> digiHcal2DHist_depth : digiHcal2DHist_depth_all) {
+    std::vector<float> digiHcalDHist_serialized_depth = Serialize2DVector(digiHcal2DHist_depth);
+    digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
+                                       digiHcalDHist_serialized_depth.begin(),
+                                       digiHcalDHist_serialized_depth.end());
+  }
 
   return digi3DHistVector_serialized;
 }
@@ -229,6 +202,7 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference(std::vector<float> &d
 
 // AD method to be called by the CMS system
 std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
+    std::string subsystem_name,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_1,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_2,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_3,
@@ -236,19 +210,38 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_5,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_6,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_7,
-    const float &LS_numEvents,
-    const float &flagDecisionThr)
+    const float LS_numEvents,
+    const float flagDecisionThr)
 
 {
+  // check model availability
+  hcal_subsystem_name = subsystem_name;
+  IsModelExist(hcal_subsystem_name);  // assert model name
+
   /**************** Prepare data ******************/
-  // convert 2d hist into 1d and commbined
-  std::vector<float> digiHcalMapTW = PrepareONNXDQMMapVectors(digiHcal2DHist_depth_1,
-                                                              digiHcal2DHist_depth_2,
-                                                              digiHcal2DHist_depth_3,
-                                                              digiHcal2DHist_depth_4,
-                                                              digiHcal2DHist_depth_5,
-                                                              digiHcal2DHist_depth_6,
-                                                              digiHcal2DHist_depth_7);
+  // merging all 2d hist into one 3d depth[ieta[iphi]]
+
+  std::vector<std::vector<std::vector<float>>> digiHcal2DHist_depth_all;
+
+  if (hcal_subsystem_name == "he") {
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_1);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_2);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_3);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_4);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_5);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_6);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_7);
+  }
+
+  else if (hcal_subsystem_name == "hb") {
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_1);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_2);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_3);
+    digiHcal2DHist_depth_all.push_back(digiHcal2DHist_depth_4);
+  }
+
+  // convert the 3d depth[ieta[iphi]] vector into 1d and commbined
+  std::vector<float> digiHcalMapTW = PrepareONNXDQMMapVectors(digiHcal2DHist_depth_all);
 
   const std::vector<float> adThr{flagDecisionThr};  // AD decision threshold, increase to reduce sensitivity
   const std::vector<float> numEvents{LS_numEvents};

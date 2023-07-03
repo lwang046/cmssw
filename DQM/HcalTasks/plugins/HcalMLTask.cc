@@ -224,7 +224,8 @@ std::shared_ptr<hcaldqm::Cache> HcalMLTask::globalBeginLuminosityBlock(edm::Lumi
           Occupancy1LS.get(did);
   }
 
-  std::vector<std::vector<float>> ad_HBmodel_output_vectors = dqmadObj_HB->Inference_CMSSW(digiHcal2DHist_depth_1,
+  std::vector<std::vector<float>> ad_HBmodel_output_vectors = dqmadObj_HB->Inference_CMSSW("hb",
+                                                                                           digiHcal2DHist_depth_1,
                                                                                            digiHcal2DHist_depth_2,
                                                                                            digiHcal2DHist_depth_3,
                                                                                            digiHcal2DHist_depth_4,
@@ -234,7 +235,8 @@ std::shared_ptr<hcaldqm::Cache> HcalMLTask::globalBeginLuminosityBlock(edm::Lumi
                                                                                            LS_numEvents,
                                                                                            (float)flagDecisionThr);
 
-  std::vector<std::vector<float>> ad_HEmodel_output_vectors = dqmadObj_HE->Inference_CMSSW(digiHcal2DHist_depth_1,
+  std::vector<std::vector<float>> ad_HEmodel_output_vectors = dqmadObj_HE->Inference_CMSSW("he",
+                                                                                           digiHcal2DHist_depth_1,
                                                                                            digiHcal2DHist_depth_2,
                                                                                            digiHcal2DHist_depth_3,
                                                                                            digiHcal2DHist_depth_4,
