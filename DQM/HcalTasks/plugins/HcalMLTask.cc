@@ -64,13 +64,20 @@ private:
   std::unique_ptr<OnlineDQMDigiAD> dqmadObj_HB = NULL;
   std::unique_ptr<OnlineDQMDigiAD> dqmadObj_HE = NULL;
 
-  std::vector<std::vector<float>> digiHcal2DHist_depth_1;
-  std::vector<std::vector<float>> digiHcal2DHist_depth_2;
-  std::vector<std::vector<float>> digiHcal2DHist_depth_3;
-  std::vector<std::vector<float>> digiHcal2DHist_depth_4;
-  std::vector<std::vector<float>> digiHcal2DHist_depth_5;
-  std::vector<std::vector<float>> digiHcal2DHist_depth_6;
-  std::vector<std::vector<float>> digiHcal2DHist_depth_7;
+  std::vector<std::vector<float>> digiHcal2DHist_depth_1{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
+  std::vector<std::vector<float>> digiHcal2DHist_depth_2{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
+  std::vector<std::vector<float>> digiHcal2DHist_depth_3{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
+  std::vector<std::vector<float>> digiHcal2DHist_depth_4{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
+  std::vector<std::vector<float>> digiHcal2DHist_depth_5{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
+  std::vector<std::vector<float>> digiHcal2DHist_depth_6{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
+  std::vector<std::vector<float>> digiHcal2DHist_depth_7{
+      std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};
 };
 
 HcalMLTask::HcalMLTask(edm::ParameterSet const& ps)
@@ -164,13 +171,20 @@ std::shared_ptr<hcaldqm::Cache> HcalMLTask::globalBeginLuminosityBlock(edm::Lumi
   _xQuality.reset();
   _xQuality = lumiCache->xQuality;
 
-  digiHcal2DHist_depth_1.clear();
-  digiHcal2DHist_depth_2.clear();
-  digiHcal2DHist_depth_3.clear();
-  digiHcal2DHist_depth_4.clear();
-  digiHcal2DHist_depth_5.clear();
-  digiHcal2DHist_depth_6.clear();
-  digiHcal2DHist_depth_7.clear();
+  for (auto& HistElement : digiHcal2DHist_depth_1)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
+  for (auto& HistElement : digiHcal2DHist_depth_2)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
+  for (auto& HistElement : digiHcal2DHist_depth_3)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
+  for (auto& HistElement : digiHcal2DHist_depth_4)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
+  for (auto& HistElement : digiHcal2DHist_depth_5)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
+  for (auto& HistElement : digiHcal2DHist_depth_6)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
+  for (auto& HistElement : digiHcal2DHist_depth_7)
+    std::fill(HistElement.begin(), HistElement.end(), 0);
   float LS_numEvents = (float)_evsPerLS;
 
   std::vector<HcalGenericDetId> dids = _emap->allPrecisionId();
@@ -255,11 +269,11 @@ void HcalMLTask::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   desc.addUntracked<std::string>("name", "HcalMLTask");
   desc.addUntracked<std::string>(
       "onnx_model_path_HB",
-      "../data/models/HB_2022/"
+      "DQM/HcalTasks/data/models/HB_2022/"
       "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_7763_v06_02_2023_22h55_stateful.onnx");
   desc.addUntracked<std::string>(
       "onnx_model_path_HE",
-      "../data/models/HE_2022/"
+      "DQM/HcalTasks/data/models/HE_2022/"
       "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_7763_v06_02_2023_22h55_stateful.onnx");
   desc.addUntracked<double>("flagDecisionThr", 20.);
   desc.addUntracked<int>("debug", 0);
