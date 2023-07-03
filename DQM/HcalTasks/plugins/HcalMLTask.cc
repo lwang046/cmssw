@@ -84,11 +84,11 @@ HcalMLTask::HcalMLTask(edm::ParameterSet const& ps)
     : DQTask(ps), hcalDbServiceToken_(esConsumes<HcalDbService, HcalDbRecord, edm::Transition::BeginRun>()) {
   onnx_model_path_HB = ps.getUntrackedParameter<std::string>(
       "onnx_model_path_HB",
-      "../data/models/HB_2022/"
-      "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_7763_v06_02_2023_22h55_stateful.onnx");
+      "DQM/HcalTasks//data/models/HB_2022/"
+      "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_5218_v06_02_2023_21h01_stateful.onnx");
   onnx_model_path_HE = ps.getUntrackedParameter<std::string>(
       "onnx_model_path_HE",
-      "../data/models/HE_2022/"
+      "DQM/HcalTasks/data/models/HE_2022/"
       "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_7763_v06_02_2023_22h55_stateful.onnx");
   flagDecisionThr = ps.getUntrackedParameter<double>("flagDecisionThr", 20.);
   tagQIE11 = ps.getUntrackedParameter<edm::InputTag>("tagHBHE", edm::InputTag("hcalDigis"));
@@ -270,7 +270,7 @@ void HcalMLTask::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   desc.addUntracked<std::string>(
       "onnx_model_path_HB",
       "DQM/HcalTasks/data/models/HB_2022/"
-      "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_7763_v06_02_2023_22h55_stateful.onnx");
+      "CGAE_MultiDim_SPATIAL_vONNX_RCLv22_PIXEL_BT_BN_RIN_IPHI_MED_5218_v06_02_2023_21h01_stateful.onnx");
   desc.addUntracked<std::string>(
       "onnx_model_path_HE",
       "DQM/HcalTasks/data/models/HE_2022/"
