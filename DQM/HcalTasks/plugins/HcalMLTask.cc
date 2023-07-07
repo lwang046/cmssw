@@ -99,8 +99,8 @@ HcalMLTask::HcalMLTask(edm::ParameterSet const& ps)
   tokHO = consumes<HODigiCollection>(tagHO);
   tokQIE10 = consumes<QIE10DigiCollection>(tagQIE10);
 
-  auto dqmadObj_HB_ = std::make_unique<OnlineDQMDigiAD>(onnx_model_path_HB, Backend::cpu);
-  auto dqmadObj_HE_ = std::make_unique<OnlineDQMDigiAD>(onnx_model_path_HE, Backend::cpu);
+  auto dqmadObj_HB_ = std::make_unique<OnlineDQMDigiAD>("hb", onnx_model_path_HB, Backend::cpu);
+  auto dqmadObj_HE_ = std::make_unique<OnlineDQMDigiAD>("he", onnx_model_path_HE, Backend::cpu);
   dqmadObj_HB = std::move(dqmadObj_HB_);
   dqmadObj_HE = std::move(dqmadObj_HE_);
 }
@@ -224,8 +224,7 @@ std::shared_ptr<hcaldqm::Cache> HcalMLTask::globalBeginLuminosityBlock(edm::Lumi
           Occupancy1LS.get(did);
   }
 
-  std::vector<std::vector<float>> ad_HBmodel_output_vectors = dqmadObj_HB->Inference_CMSSW("hb",
-                                                                                           digiHcal2DHist_depth_1,
+  std::vector<std::vector<float>> ad_HBmodel_output_vectors = dqmadObj_HB->Inference_CMSSW(digiHcal2DHist_depth_1,
                                                                                            digiHcal2DHist_depth_2,
                                                                                            digiHcal2DHist_depth_3,
                                                                                            digiHcal2DHist_depth_4,
@@ -235,8 +234,7 @@ std::shared_ptr<hcaldqm::Cache> HcalMLTask::globalBeginLuminosityBlock(edm::Lumi
                                                                                            LS_numEvents,
                                                                                            (float)flagDecisionThr);
 
-  std::vector<std::vector<float>> ad_HEmodel_output_vectors = dqmadObj_HE->Inference_CMSSW("he",
-                                                                                           digiHcal2DHist_depth_1,
+  std::vector<std::vector<float>> ad_HEmodel_output_vectors = dqmadObj_HE->Inference_CMSSW(digiHcal2DHist_depth_1,
                                                                                            digiHcal2DHist_depth_2,
                                                                                            digiHcal2DHist_depth_3,
                                                                                            digiHcal2DHist_depth_4,

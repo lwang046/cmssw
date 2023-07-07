@@ -31,7 +31,9 @@
 using namespace cms::Ort;
 
 // Constructor
-OnlineDQMDigiAD::OnlineDQMDigiAD(const std::string &modelFilepath, Backend backend) {
+OnlineDQMDigiAD::OnlineDQMDigiAD(const std::string model_system_name,
+                                 const std::string &modelFilepath,
+                                 Backend backend) {
   std::string instanceName{"DESMOD Digioccupancy Map AD inference"};
 
   /**************** Initailize Model Memory States ******************/
@@ -39,25 +41,61 @@ OnlineDQMDigiAD::OnlineDQMDigiAD(const std::string &modelFilepath, Backend backe
 
   /**************** Create ORT session ******************/
   // Set up options for session
-
   auto session_options = ONNXRuntime::defaultSessionOptions(backend);
   // session_options = ONNXRuntime::defaultSessionOptions(backend);
   // Create session by loading the onnx model
-  // std::string model_path = edm::FileInPath(modelFilepath).fullPath();
   model_path = edm::FileInPath(modelFilepath).fullPath();
-
-  //ort_mSession = ONNXRuntime(model_path, &session_options);
   auto uOrtSession = std::make_unique<ONNXRuntime>(model_path, &session_options);
   ort_mSession = std::move(uOrtSession);
 
-  std::cout << "******* model loading is success *******" << std::endl;
+  //std::cout << "******* model loading is success *******" << std::endl;
   // output_names = {"target_data", "pred_data", "pred_err_spatial_scaled", "pred_err_window_spatial_scaled", "pred_err_spatial_scaled_aml", "red_err_window_spatial_scaled_aml"};
+
+  // output_names = ort_mSession->getOutputNames();
+
+  // check model availability
+  hcal_subsystem_name = model_system_name;
+
+  IsModelExist(hcal_subsystem_name);  // assert model integration for the given hcal system name
+
+  if (hcal_subsystem_name == "he") {
+    std::vector<std::vector<int64_t>> input_shapes_ = {
+        {batch_size, 64, 72, 7, 1},
+        {batch_size, 1},
+        {1, 1},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][1]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][1]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][1]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][1]}};  // input dims
+    input_shapes = input_shapes_;
+  }
+
+  else if (hcal_subsystem_name == "hb") {
+    std::vector<std::vector<int64_t>> input_shapes_ = {
+        {batch_size, 64, 72, 4, 1},
+        {batch_size, 1},
+        {1, 1},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][1]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[0][1]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][0]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][1]},
+        {batch_size, model_state_inner_dim, model_state_layer_dims[1][1]}};  // input dims
+    input_shapes = input_shapes_;
+  }
 }
 
-void OnlineDQMDigiAD::IsModelExist(std::string subsystem_name) {
-  assert(std::find(hcal_modeled_systems.begin(), hcal_modeled_systems.end(), subsystem_name) !=
+void OnlineDQMDigiAD::IsModelExist(std::string hcal_subsystem_name) {
+  assert(std::find(hcal_modeled_systems.begin(), hcal_modeled_systems.end(), hcal_subsystem_name) !=
          hcal_modeled_systems.end());
-  std::cout << "onnx model integration is supported for the selected " << subsystem_name << " system!" << std::endl;
+
+  //std::cout << "onnx model integration is supported for the selected " << hcal_subsystem_name << " system!" << std::endl;
 }
 
 void OnlineDQMDigiAD::InitializeState() {
@@ -154,8 +192,8 @@ std::vector<std::vector<std::vector<float>>> OnlineDQMDigiAD::ONNXOutputToDQMHis
 
 // Perform inference for a given dqm map
 std::vector<std::vector<float>> OnlineDQMDigiAD::Inference(std::vector<float> &digiHcalMapTW,
-                                                           const std::vector<float> &numEvents,
-                                                           const std::vector<float> &adThr,
+                                                           std::vector<float> &numEvents,
+                                                           std::vector<float> &adThr,
                                                            std::vector<float> &input_model_state_memory_e_0_0,
                                                            std::vector<float> &input_model_state_memory_e_0_1,
                                                            std::vector<float> &input_model_state_memory_e_1_0,
@@ -170,12 +208,7 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference(std::vector<float> &d
   // Assign memory for input tensor
   // inputTensors will be used by the Session Run for inference
 
-  const unsigned batch_size = 1;  // number sample to  be evaluated at once, a single time-window
-
-  // typedef std::vector<std::vector<float>> FloatArrays;
-  // FloatArrays input_values {digiHcalMapTW, numEvents, adThr};
-
-  std::vector<std::vector<float>> input_values;
+  input_values.clear();
   input_values.emplace_back(digiHcalMapTW);
   input_values.emplace_back(numEvents);
   input_values.emplace_back(adThr);
@@ -188,21 +221,18 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference(std::vector<float> &d
   input_values.emplace_back(input_model_state_memory_d_1_0);
   input_values.emplace_back(input_model_state_memory_d_1_1);
 
-  std::vector<std::vector<float>> outputs;
-
   /**************** Inference ******************/
 
-  CPPUNIT_ASSERT_NO_THROW(outputs = ort_mSession->run(input_names, input_values, {}, output_names, batch_size));
+  CPPUNIT_ASSERT_NO_THROW(output_values =
+                              ort_mSession->run(input_names, input_values, input_shapes, output_names, batch_size));
+  //std::cout << "onnx model outputs size: " << output_values.size() << std::endl;
+  CPPUNIT_ASSERT(output_values.size() == output_names.size());
 
-  CPPUNIT_ASSERT(outputs.size() == output_names.size());
-  CPPUNIT_ASSERT(outputs[0].size() == batch_size);
-
-  return outputs;
+  return output_values;
 }
 
 // AD method to be called by the CMS system
 std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
-    std::string subsystem_name,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_1,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_2,
     const std::vector<std::vector<float>> &digiHcal2DHist_depth_3,
@@ -214,13 +244,8 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
     const float flagDecisionThr)
 
 {
-  // check model availability
-  hcal_subsystem_name = subsystem_name;
-  IsModelExist(hcal_subsystem_name);  // assert model name
-
   /**************** Prepare data ******************/
   // merging all 2d hist into one 3d depth[ieta[iphi]]
-
   std::vector<std::vector<std::vector<float>>> digiHcal2DHist_depth_all;
 
   if (hcal_subsystem_name == "he") {
@@ -243,8 +268,8 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
   // convert the 3d depth[ieta[iphi]] vector into 1d and commbined
   std::vector<float> digiHcalMapTW = PrepareONNXDQMMapVectors(digiHcal2DHist_depth_all);
 
-  const std::vector<float> adThr{flagDecisionThr};  // AD decision threshold, increase to reduce sensitivity
-  const std::vector<float> numEvents{LS_numEvents};
+  std::vector<float> adThr{flagDecisionThr};  // AD decision threshold, increase to reduce sensitivity
+  std::vector<float> numEvents{LS_numEvents};
 
   // call model inference
   /**************** Inference ******************/
@@ -261,21 +286,10 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
                                                              input_model_state_memory_d_1_1);
 
   // auto output_tensors = Inference(digiHcalMapTW, numEvents, adThr);
-  std::cout << "******* model inference is success *******" << std::endl;
-
-  // // print the output data
-  // std::vector<std::vector<float>> ad_model_output;
-  // for (const auto &output_tensor : output_tensors)
-  // {
-  //     std::cout << "output array size: " << output_tensor.size() << std::endl;
-  //     ad_model_output.emplace_back(output_tensor);
-  // }
+  //std::cout << "******* model inference is success *******" << std::endl;
 
   /**************** Output post processing ******************/
-  if (output_names.size() != output_tensors.size()) {
-    std::cout << "Output vectors size must have the same size with output names." << std::endl;
-    return std::vector<std::vector<float>>();
-  }
+  CPPUNIT_ASSERT(output_tensors.size() == output_names.size());
 
   //  split outputs into ad output vectors and state_memory vectors
   std::string state_output_name_tag = "rnn_hidden";
@@ -284,40 +298,40 @@ std::vector<std::vector<float>> OnlineDQMDigiAD::Inference_CMSSW(
     std::string output_names_startstr = output_names[i].substr(
         2, state_output_name_tag.length());  // Extract the same number of characters as str2 from mOutputNames
     if (output_names_startstr == state_output_name_tag) {
-      std::cout << output_names[i] << ": state output array size: " << output_tensors[i].size() << std::endl;
+      //std::cout << output_names[i] << ": state output array size: " << output_tensors[i].size() << std::endl;
       ad_model_state_vectors.emplace_back(output_tensors[i]);
     } else {
-      std::cout << output_names[i] << ": ad output array size: " << output_tensors[i].size() << std::endl;
+      //std::cout << output_names[i] << ": ad output array size: " << output_tensors[i].size() << std::endl;
       ad_model_output_vectors.emplace_back(output_tensors[i]);
     }
   }
 
-  const int num_state_vectors = 8;  // number of model state vectors
-  if (ad_model_output_vectors.size() != num_state_vectors) {
-    std::cout << "The number of output state vectors does not equals to expected." << std::endl;
-    return std::vector<std::vector<float>>();
+  if (ad_model_output_vectors.size() == num_state_vectors) {
+    input_model_state_memory_e_0_0 = ad_model_state_vectors[0];
+    input_model_state_memory_e_0_1 = ad_model_state_vectors[1];
+    input_model_state_memory_e_1_0 = ad_model_state_vectors[2];
+    input_model_state_memory_e_1_1 = ad_model_state_vectors[3];
+    input_model_state_memory_d_0_0 = ad_model_state_vectors[4];
+    input_model_state_memory_d_0_1 = ad_model_state_vectors[5];
+    input_model_state_memory_d_1_0 = ad_model_state_vectors[6];
+    input_model_state_memory_d_1_1 = ad_model_state_vectors[7];
+  } else {
+    std::cout << "Warning: the number of output state vectors does NOT equals to expected!. The states are set to  "
+                 "default values."
+              << std::endl;
+    InitializeState();
   }
-
-  input_model_state_memory_e_0_0 = ad_model_state_vectors[0];
-  input_model_state_memory_e_0_1 = ad_model_state_vectors[1];
-  input_model_state_memory_e_1_0 = ad_model_state_vectors[2];
-  input_model_state_memory_e_1_1 = ad_model_state_vectors[3];
-  input_model_state_memory_d_0_0 = ad_model_state_vectors[4];
-  input_model_state_memory_d_0_1 = ad_model_state_vectors[5];
-  input_model_state_memory_d_1_0 = ad_model_state_vectors[6];
-  input_model_state_memory_d_1_1 = ad_model_state_vectors[7];
 
   // # if onnx is returning serialized 1d vectors instead of vector of 3d vectors
   // aml score and flag are at index 5 and 7 of the vector ad_model_output_vectors: anomaly score: ad_model_output_vectors[5], anomaly flags: ad_model_output_vectors[7]
   /*
-    selOutputIdx: index to select of the onnx output. e.g. 5 is the anomaly score and 7 is the anomaly flag (1 is with anomaly, 0 is healthy)
-    std::vector<std::vector<std::vector<float>>> digiHcal3DHist_ANOMALY_FLAG = ONNXOutputToDQMHistMap(ad_model_output_vectors, 7)
-    std::vector<std::vector<std::vector<float>>> digiHcal3DHist_ANOMALY_SCORE = ONNXOutputToDQMHistMap(ad_model_output_vectors, 5)
-    */
+      selOutputIdx: index to select of the onnx output. e.g. 5 is the anomaly score and 7 is the anomaly flag (1 is with anomaly, 0 is healthy)
+      std::vector<std::vector<std::vector<float>>> digiHcal3DHist_ANOMALY_FLAG = ONNXOutputToDQMHistMap(ad_model_output_vectors, 7)
+      std::vector<std::vector<std::vector<float>>> digiHcal3DHist_ANOMALY_SCORE = ONNXOutputToDQMHistMap(ad_model_output_vectors, 5)
+      */
 
   // reduce counter for each ls call. due to onnx double datatype handling limitation that might cause precision error to propagate.
-  --model_state_refresh_counter;
-  if (model_state_refresh_counter == 0)
+  if (--model_state_refresh_counter == 0)
     InitializeState();
 
   return ad_model_output_vectors;
