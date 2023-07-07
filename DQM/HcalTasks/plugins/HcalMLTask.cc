@@ -61,8 +61,8 @@ private:
   hcaldqm::ContainerXXX<double> Occupancy1LS;
   hcaldqm::Container1D MLFlagvsLS_Subdet;
 
-  std::unique_ptr<OnlineDQMDigiAD> dqmadObj_HB = NULL;
-  std::unique_ptr<OnlineDQMDigiAD> dqmadObj_HE = NULL;
+  std::unique_ptr<OnlineDQMDigiAD> dqmadObj_HB = nullptr;
+  std::unique_ptr<OnlineDQMDigiAD> dqmadObj_HE = nullptr;
 
   std::vector<std::vector<float>> digiHcal2DHist_depth_1{
       std::vector<std::vector<float>>(64, std::vector<float>(72, 0))};

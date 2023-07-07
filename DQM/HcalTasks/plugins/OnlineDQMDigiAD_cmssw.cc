@@ -158,7 +158,7 @@ std::vector<float> OnlineDQMDigiAD::PrepareONNXDQMMapVectors(
     std::vector<std::vector<std::vector<float>>> &digiHcal2DHist_depth_all) {
   std::vector<float> digi3DHistVector_serialized;
 
-  for (std::vector<std::vector<float>> digiHcal2DHist_depth : digiHcal2DHist_depth_all) {
+  for (const std::vector<std::vector<float>>& digiHcal2DHist_depth : digiHcal2DHist_depth_all) {
     std::vector<float> digiHcalDHist_serialized_depth = Serialize2DVector(digiHcal2DHist_depth);
     digi3DHistVector_serialized.insert(digi3DHistVector_serialized.end(),
                                        digiHcalDHist_serialized_depth.begin(),
@@ -177,11 +177,11 @@ std::vector<std::vector<std::vector<float>>> OnlineDQMDigiAD::ONNXOutputToDQMHis
   // for (size_t i: selOutputIndices)
   // // for (std::vector<float> output_vector : ad_model_output_vectors)
   // {
-  std::vector<float> output_vector = ad_model_output_vectors[selOutputIdx];
+  const std::vector<float>& output_vector = ad_model_output_vectors[selOutputIdx];
   std::vector<std::vector<float>> output_2d_vec = Map1DTo2DVector(output_vector, numDepth);
 
   std::vector<std::vector<std::vector<float>>> digiHcal3DHist;
-  for (std::vector<float> output_vector_depth : output_2d_vec) {
+  for (const std::vector<float>& output_vector_depth : output_2d_vec) {
     std::vector<std::vector<float>> digiHcal2DHist_depth = Map1DTo2DVector(output_vector_depth, numDIeta);
     digiHcal3DHist.push_back(digiHcal2DHist_depth);
   }

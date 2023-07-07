@@ -100,7 +100,7 @@ private:
   // onnx session
   const std::vector<std::string> hcal_modeled_systems = {"he", "hb"};
   std::string hcal_subsystem_name;
-  std::unique_ptr<ONNXRuntime> ort_mSession = NULL;
+  std::unique_ptr<ONNXRuntime> ort_mSession = nullptr;
   std::string model_path;  // onnx model path
 
   // names of onnx model input vectors; do not change
