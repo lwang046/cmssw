@@ -55,6 +55,8 @@ protected:
   edm::EDGetTokenT<QIE10DigiCollection> _tokQIE10;
   edm::EDGetTokenT<HcalUMNioDigi> _tokuMN;
   edm::ESGetToken<HcalDbService, HcalDbRecord> hcalDbServiceToken_;
+  edm::InputTag _tagFEDs;
+  edm::EDGetTokenT<FEDRawDataCollection> _tokFEDs;
 
   enum LaserFlag { fBadTiming = 0, fMissingLaserMon = 1, nLaserFlag = 2 };
   std::vector<hcaldqm::flag::Flag> _vflags;
@@ -150,6 +152,11 @@ protected:
   //	Summaries
   hcaldqm::Container2D _cSummaryvsLS_FED;
   hcaldqm::ContainerSingle2D _cSummaryvsLS;
+
+  // 1D histograms for eventType and laserType
+  hcaldqm::ContainerSingle1D _cEventType;
+  hcaldqm::ContainerSingle1D _cLaserType;
+  hcaldqm::ContainerSingle1D _cEventType_uTCA;
 };
 
 #endif

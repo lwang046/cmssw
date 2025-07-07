@@ -18,6 +18,8 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   _tokQIE10 = consumes<QIE10DigiCollection>(_tagQIE10);
   _tokuMN = consumes<HcalUMNioDigi>(_taguMN);
   _tokLaserMon = consumes<QIE10DigiCollection>(_tagLaserMon);
+  _tagFEDs = ps.getUntrackedParameter<edm::InputTag>("tagFEDs", edm::InputTag("hltHcalCalibrationRaw"));
+  _tokFEDs = consumes<FEDRawDataCollection>(_tagFEDs);
 
   _vflags.resize(nLaserFlag);
   _vflags[fBadTiming] = hcaldqm::flag::Flag("BadTiming");
@@ -385,6 +387,26 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   }
 
   _ehashmap.initialize(_emap, electronicsmap::fD2EHashMap);
+
+  // Book eventType and laserType histograms
+  _cEventType.initialize(_name,
+                         "EventType_uMNio",
+                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fNbins),
+                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                         0);
+  _cLaserType.initialize(_name,
+                         "LaserType",
+                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fNbins),
+                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                         0);
+  _cEventType_uTCA.initialize(_name,
+                              "EventType_uHTR",
+                              new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fNbins),
+                              new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                              0);
+  _cEventType.book(ib, _subsystem);
+  _cLaserType.book(ib, _subsystem);
+  _cEventType_uTCA.book(ib, _subsystem);
 }
 
 /* virtual */ void LaserTask::_resetMonitors(hcaldqm::UpdateFreq uf) { DQTask::_resetMonitors(uf); }
@@ -769,14 +791,49 @@ void LaserTask::processLaserMon(edm::Handle<QIE10DigiCollection>& col, std::vect
     if (!e.getByToken(_tokuMN, cumn))
       return false;
 
-    //	event type check first
-    uint8_t eventType = cumn->eventType();
-    if (eventType != constants::EVENTTYPE_LASER)
+    // Below we are requiring both laser type equals 24 and uHTR event type from crate:slot 25:11 equals 14 to confirm this is a megatile laser signal
+    //  laser type check
+    uint32_t laserType = cumn->valueUserWord(0);
+    if (laserType != _laserType)
       return false;
 
-    //	check if this analysis task is of the right laser type
-    uint32_t laserType = cumn->valueUserWord(0);
-    if (laserType == _laserType)
+    //	event type check first
+    uint8_t eventType = cumn->eventType();
+    // Fill the histograms
+    _cEventType.fill(static_cast<int>(eventType));
+    _cLaserType.fill(static_cast<int>(laserType));
+
+    // uHTR event type check from crate:slot 25:11 for megatile
+    bool eventflag_uHTR = false;
+    edm::Handle<FEDRawDataCollection> craw;
+    if (!e.getByToken(_tokFEDs, craw))
+      _logger.dqmthrow("Collection FEDRawDataCollection isn't available " + _tagFEDs.label() + " " +
+                       _tagFEDs.instance());
+
+    for (int fed = FEDNumbering::MINHCALFEDID; fed <= FEDNumbering::MAXHCALuTCAFEDID && !eventflag_uHTR; fed++) {
+      if ((fed > FEDNumbering::MAXHCALFEDID && fed < FEDNumbering::MINHCALuTCAFEDID) ||
+          fed > FEDNumbering::MAXHCALuTCAFEDID)
+        continue;
+      FEDRawData const& raw = craw->FEDData(fed);
+      if (raw.size() < constants::RAW_EMPTY)
+        continue;
+
+      hcal::AMC13Header const* hamc13 = (hcal::AMC13Header const*)raw.data();
+      if (!hamc13)
+        continue;
+
+      for (int iamc = 0; iamc < hamc13->NAMC(); iamc++) {
+        HcalUHTRData uhtr(hamc13->AMCPayload(iamc), hamc13->AMCSize(iamc));
+        if (static_cast<int>(uhtr.crateId()) == 25 && static_cast<int>(uhtr.slot()) == 11) {
+          if (uhtr.getEventType() == constants::EVENTTYPE_LASER) {
+            eventflag_uHTR = true;
+            break;
+          }
+          _cEventType_uTCA.fill(uhtr.getEventType());
+        }
+      }
+    }
+    if (eventflag_uHTR)
       return true;
   }
 
