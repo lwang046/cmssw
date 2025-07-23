@@ -55,7 +55,16 @@ protected:
       _HFSumMeanofSumQForEachEvent;
   //	flag vector
   std::vector<hcaldqm::flag::Flag> _vflags;
-  enum DigiFlag { fDigiSize = 0, fUni = 1, fNChsHF = 2, fUnknownIds = 3, fLED = 4, fCapId = 5, nDigiFlag = 6 };
+  enum DigiFlag {
+    fDigiSize = 0,
+    fUni = 1,
+    fNChsHF = 2,
+    fUnknownIds = 3,
+    fLED = 4,
+    fLASER = 5,
+    fCapId = 6,
+    nDigiFlag = 7
+  };
 
   //	hashes/FED vectors
   std::vector<uint32_t> _vhashFEDs;
@@ -194,10 +203,16 @@ protected:
   // LED monitoring stuff
   double _thresh_led;
   std::map<HcalSubdetector, std::vector<HcalDetId> > _ledCalibrationChannels;
-
   hcaldqm::Container1D _LED_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LED_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LED_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
+
+  // Laser monitoring stuff
+  double _thresh_laser;
+  std::map<HcalSubdetector, std::vector<HcalDetId> > _laserCalibrationChannels;
+  hcaldqm::Container1D _LASER_CUCountvsLS_Subdet;       // Misfire count vs LS
+  hcaldqm::Container1D _LASER_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
+  hcaldqm::Container2D _LASER_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
 };
 
 #endif

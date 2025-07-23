@@ -22,6 +22,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
   _cutSumQ_HF = ps.getUntrackedParameter<double>("cutSumQ_HF", 20);
   _thresh_unihf = ps.getUntrackedParameter<double>("thresh_unihf", 0.2);
   _thresh_led = ps.getUntrackedParameter<double>("thresh_led", 20);
+  _thresh_laser = ps.getUntrackedParameter<double>("thresh_laser", 20);
 
   _vflags.resize(nDigiFlag);
   _vflags[fUni] = hcaldqm::flag::Flag("UniSlotHF");
@@ -29,6 +30,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
   _vflags[fNChsHF] = hcaldqm::flag::Flag("NChsHF");
   _vflags[fUnknownIds] = hcaldqm::flag::Flag("UnknownIds");
   _vflags[fLED] = hcaldqm::flag::Flag("LEDMisfire");
+  _vflags[fLASER] = hcaldqm::flag::Flag("LASERMisfire");
   _vflags[fCapId] = hcaldqm::flag::Flag("BadCapId");
 
   _qie10InConditions = ps.getUntrackedParameter<bool>("qie10InConditions", true);
@@ -86,6 +88,8 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
             break;
         }
         _ledCalibrationChannels[this_subdet].push_back(
+            HcalDetId(HcalOther, calibId.ieta(), calibId.iphi(), calibId.cboxChannel()));
+        _laserCalibrationChannels[this_subdet].push_back(
             HcalDetId(HcalOther, calibId.ieta(), calibId.iphi(), calibId.cboxChannel()));
       }
     }
@@ -652,6 +656,28 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                               0);
     }
+    // Laser monitoring containers
+    _LASER_ADCvsBX_Subdet.initialize(_name,
+                                     "LASER_ADCvsBX",
+                                     hcaldqm::hashfunctions::fSubdet,
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fBX_36),
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256_4),
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                     0);
+    _LASER_CUCountvsLS_Subdet.initialize(_name,
+                                         "LASER_CUCountvsLS",
+                                         hcaldqm::hashfunctions::fSubdet,
+                                         new hcaldqm::quantity::LumiSection(_maxLS),
+                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                         0);
+    if (_ptype == fOnline) {
+      _LASER_CUCountvsLSmod60_Subdet.initialize(_name,
+                                                "LASER_CUCountvsLSmod60",
+                                                hcaldqm::hashfunctions::fSubdet,
+                                                new hcaldqm::quantity::LumiSection(60),
+                                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                                0);
+    }
   }
 
   //	BOOK HISTOGRAMS
@@ -735,6 +761,12 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     _LED_CUCountvsLS_Subdet.book(ib, _emap, _subsystem);
     if (_ptype == fOnline) {
       _LED_CUCountvsLSmod60_Subdet.book(ib, _emap, _subsystem);
+    }
+    // Book laser monitoring containers
+    _LASER_ADCvsBX_Subdet.book(ib, _emap, _subsystem);
+    _LASER_CUCountvsLS_Subdet.book(ib, _emap, _subsystem);
+    if (_ptype == fOnline) {
+      _LASER_CUCountvsLSmod60_Subdet.book(ib, _emap, _subsystem);
     }
   }
 
@@ -928,6 +960,40 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                 _LED_CUCountvsLS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS);
                 if (_ptype == fOnline) {
                   _LED_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS % 60);
+                }
+              }
+            }
+            // Laser monitoring from calibration channels
+            if (std::find(_laserCalibrationChannels[HcalEndcap].begin(),
+                          _laserCalibrationChannels[HcalEndcap].end(),
+                          did) != _laserCalibrationChannels[HcalEndcap].end()) {
+              bool channelLASERSignalPresent = false;
+              for (int i = 0; i < digi.samples(); i++) {
+                _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), bx, digi[i].adc());
+                if (digi[i].adc() > _thresh_laser) {
+                  channelLASERSignalPresent = true;
+                }
+              }
+              if (channelLASERSignalPresent) {
+                _LASER_CUCountvsLS_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), _currentLS);
+                if (_ptype == fOnline) {
+                  _LASER_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), _currentLS % 60);
+                }
+              }
+            } else if (std::find(_laserCalibrationChannels[HcalBarrel].begin(),
+                                 _laserCalibrationChannels[HcalBarrel].end(),
+                                 did) != _laserCalibrationChannels[HcalBarrel].end()) {
+              bool channelLASERSignalPresent = false;
+              for (int i = 0; i < digi.samples(); i++) {
+                _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), bx, digi[i].adc());
+                if (digi[i].adc() > _thresh_laser) {
+                  channelLASERSignalPresent = true;
+                }
+              }
+              if (channelLASERSignalPresent) {
+                _LASER_CUCountvsLS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS);
+                if (_ptype == fOnline) {
+                  _LASER_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS % 60);
                 }
               }
             }
@@ -1161,6 +1227,24 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                 }
               }
             }
+            // Laser monitoring from calibration channels (HO)
+            if (std::find(_laserCalibrationChannels[HcalOuter].begin(),
+                          _laserCalibrationChannels[HcalOuter].end(),
+                          did) != _laserCalibrationChannels[HcalOuter].end()) {
+              bool channelLASERSignalPresent = false;
+              for (int i = 0; i < digi.size(); i++) {
+                _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), bx, digi[i].adc());
+                if (digi[i].adc() > _thresh_laser) {
+                  channelLASERSignalPresent = true;
+                }
+              }
+              if (channelLASERSignalPresent) {
+                _LASER_CUCountvsLS_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), _currentLS);
+                if (_ptype == fOnline) {
+                  _LASER_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), _currentLS % 60);
+                }
+              }
+            }
           }
         }
       }
@@ -1332,6 +1416,24 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                   _LED_CUCountvsLS_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), _currentLS);
                   if (_ptype == fOnline) {
                     _LED_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), _currentLS % 60);
+                  }
+                }
+              }
+              // Laser monitoring from calibration channels (HF)
+              if (std::find(_laserCalibrationChannels[HcalForward].begin(),
+                            _laserCalibrationChannels[HcalForward].end(),
+                            did) != _laserCalibrationChannels[HcalForward].end()) {
+                bool channelLASERSignalPresent = false;
+                for (int i = 0; i < digi.samples(); i++) {
+                  _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), bx, digi[i].adc());
+                  if (digi[i].adc() > _thresh_laser) {
+                    channelLASERSignalPresent = true;
+                  }
+                }
+                if (channelLASERSignalPresent) {
+                  _LASER_CUCountvsLS_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), _currentLS);
+                  if (_ptype == fOnline) {
+                    _LASER_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), _currentLS % 60);
                   }
                 }
               }
@@ -1615,6 +1717,13 @@ std::shared_ptr<hcaldqm::Cache> DigiTask::globalBeginLuminosityBlock(edm::Lumino
           } else {
             _vflags[fLED]._state = hcaldqm::flag::fGOOD;
           }
+          // Laser misfires
+          if (_LASER_CUCountvsLS_Subdet.getBinContent(did_hb, _currentLS) > 0 ||
+              _LASER_CUCountvsLS_Subdet.getBinContent(did_he, _currentLS) > 0) {
+            _vflags[fLASER]._state = hcaldqm::flag::fBAD;
+          } else {
+            _vflags[fLASER]._state = hcaldqm::flag::fGOOD;
+          }
         } else if (hcaldqm::utilities::isFEDHF(eid)) {
           HcalDetId did_hf(hcaldqm::hashfunctions::hash_Subdet(HcalDetId(HcalForward, 29, 1, 1)));
           if (_LED_CUCountvsLS_Subdet.getBinContent(did_hf, _currentLS) > 0) {
@@ -1622,12 +1731,22 @@ std::shared_ptr<hcaldqm::Cache> DigiTask::globalBeginLuminosityBlock(edm::Lumino
           } else {
             _vflags[fLED]._state = hcaldqm::flag::fGOOD;
           }
+          if (_LASER_CUCountvsLS_Subdet.getBinContent(did_hf, _currentLS) > 0) {
+            _vflags[fLASER]._state = hcaldqm::flag::fBAD;
+          } else {
+            _vflags[fLASER]._state = hcaldqm::flag::fGOOD;
+          }
         } else if (hcaldqm::utilities::isFEDHO(eid)) {
           HcalDetId did_ho(hcaldqm::hashfunctions::hash_Subdet(HcalDetId(HcalOuter, 1, 1, 1)));
           if (_LED_CUCountvsLS_Subdet.getBinContent(did_ho, _currentLS) > 0) {
             _vflags[fLED]._state = hcaldqm::flag::fBAD;
           } else {
             _vflags[fLED]._state = hcaldqm::flag::fGOOD;
+          }
+          if (_LASER_CUCountvsLS_Subdet.getBinContent(did_ho, _currentLS) > 0) {
+            _vflags[fLASER]._state = hcaldqm::flag::fBAD;
+          } else {
+            _vflags[fLASER]._state = hcaldqm::flag::fGOOD;
           }
         }
       }
