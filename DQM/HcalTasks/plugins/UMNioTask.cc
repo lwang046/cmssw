@@ -58,13 +58,13 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
                                   new hcaldqm::quantity::DetectorQuantity(quantity::fSubdetPM),
                                   new hcaldqm::quantity::ValueQuantity(quantity::ffC_10000, true),
                                   0);
-  _cEventType_uMNio.initialize(_name,
-                               "EventType_uMNio",
+  _cEventType_uMNio.initialize(_name + "/EventType",
+                               "uMNio",
                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fNbins),
                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                0);
-  _cEventType_uHTR.initialize(_name,
-                              "EventType_uHTR",
+  _cEventType_uHTR.initialize(_name + "/EventType",
+                              "uHTR",
                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fNbins),
                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                               0);

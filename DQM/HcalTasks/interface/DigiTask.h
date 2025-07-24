@@ -23,6 +23,7 @@
 #include "DQM/HcalCommon/interface/ContainerProf2D.h"
 #include "DQM/HcalCommon/interface/ContainerSingle1D.h"
 #include "DQM/HcalCommon/interface/ContainerSingle2D.h"
+#include "DQM/HcalCommon/interface/ContainerSingleProf1D.h"
 #include "DQM/HcalCommon/interface/ContainerSingleProf2D.h"
 #include "DQM/HcalCommon/interface/ContainerXXX.h"
 
@@ -213,6 +214,11 @@ protected:
   hcaldqm::Container1D _LASER_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LASER_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LASER_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
+
+  // Laser monitoring for pin diode channel (0, 31, 0)
+  hcaldqm::ContainerSingleProf1D _cSumQvsBX_PinDiode;
+  hcaldqm::ContainerSingleProf1D _cSumQvsLS_PinDiode;
+  hcaldqm::ContainerSingleProf1D _cADCvsTS_PinDiode;
 };
 
 #endif

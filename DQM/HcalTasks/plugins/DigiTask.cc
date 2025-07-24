@@ -678,6 +678,21 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                                 new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                                 0);
     }
+    _cSumQvsBX_PinDiode.initialize(_name + "/PinDiodeMon",
+                                   "sumQvsBX",
+                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fBX),
+                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::ffC_1000000),
+                                   0);
+    _cSumQvsLS_PinDiode.initialize(_name + "/PinDiodeMon",
+                                   "sumQvsLS",
+                                   new hcaldqm::quantity::LumiSection(_maxLS),
+                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::ffC_1000000),
+                                   0);
+    _cADCvsTS_PinDiode.initialize(_name + "/PinDiodeMon",
+                                  "ADCvsTS",
+                                  new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                                  new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256),
+                                  0);
   }
 
   //	BOOK HISTOGRAMS
@@ -768,6 +783,9 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     if (_ptype == fOnline) {
       _LASER_CUCountvsLSmod60_Subdet.book(ib, _emap, _subsystem);
     }
+    _cSumQvsBX_PinDiode.book(ib, _subsystem);
+    _cSumQvsLS_PinDiode.book(ib, _subsystem);
+    _cADCvsTS_PinDiode.book(ib, _subsystem);
   }
 
   //	BOOK HISTOGRAMS that are only for Online
@@ -923,6 +941,8 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     //	Explicit check on the DetIds present in the Collection
     HcalDetId const& did = digi.detid();
     if ((did.subdet() != HcalBarrel) && (did.subdet() != HcalEndcap)) {
+      HcalCalibDetId hcdid(digi.id());
+
       // LED monitoring from calibration channels
       if (_ptype != fLocal) {
         if (did.subdet() == HcalOther) {
@@ -998,6 +1018,15 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               }
             }
           }
+        }
+      }
+      if (hcdid.rawId() == constants::HBLasMon.rawId()) {
+        CaloSamples digi_fC = hcaldqm::utilities::loadADC2fCDB<QIE11DataFrame>(_dbService, did, digi);
+        double sumQ = hcaldqm::utilities::sumQDB<QIE11DataFrame>(_dbService, digi_fC, did, digi, 0, digi.samples() - 1);
+        _cSumQvsBX_PinDiode.fill(bx, sumQ);
+        _cSumQvsLS_PinDiode.fill(_currentLS, sumQ);
+        for (int i = 0; i < digi.samples(); i++) {
+          _cADCvsTS_PinDiode.fill(i, digi[i].adc());
         }
       }
       continue;
