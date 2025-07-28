@@ -53,7 +53,7 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
   _cUHTRType.initialize(_name,
                         "UHTRType",
                         new hcaldqm::quantity::LumiSection(_maxLS),
-                        new hcaldqm::quantity::EventType(_uHTRtypes),
+                        new hcaldqm::quantity::uHTRType(_uHTRtypes),
                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                         0);
 
@@ -143,6 +143,8 @@ int UMNioTask::getUHTRType(uint8_t eventType) {
     uHTRType = uHFRaddam;
   } else if (eventType == constants::EVENTTYPE_LASER) {
     uHTRType = uLaser;
+  } else {
+    uHTRType = uUnknown;
   }
   return (int)(std::find(_uHTRtypes.begin(), _uHTRtypes.end(), uHTRType) - _uHTRtypes.begin());
 }

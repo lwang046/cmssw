@@ -331,7 +331,8 @@ namespace hcaldqm {
       uLED = 3,
       uHFRaddam = 4,
       uLaser = 5,
-      nHTRType = 6,
+      uUnknown = 6,
+      nHTRType = 7,
     };
   }  // namespace constants
 }  // namespace hcaldqm
