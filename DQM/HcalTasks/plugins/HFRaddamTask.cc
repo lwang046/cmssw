@@ -127,9 +127,9 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps) : DQTask(ps) {
 
     // Below we are requiring both laser type equals 24 and uHTR event type from crate:slot 22:01 equals 14 to confirm this is a HFRaddam laser signal
     //  laser type check
-    uint32_t laserType = cumn->valueUserWord(0);
-    if (laserType != _laserType)
-      return false;
+    //uint32_t laserType = cumn->valueUserWord(0);
+    //if (laserType != _laserType)
+    //  return false;
 
     // uHTR event type check from crate:slot 22:01 for HF Raddam
     bool eventflag_uHTR = false;

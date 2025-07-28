@@ -27,6 +27,9 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
   for (uint32_t type = constants::tNull; type < constants::nOrbitGapType; type++) {
     _eventtypes.push_back(type);
   }
+  for (uint32_t type = constants::uNull; type < constants::nHTRType; type++) {
+    _uHTRtypes.push_back(type);
+  }
 }
 
 /* virtual */ void UMNioTask::bookHistograms(DQMStore::IBooker& ib, edm::Run const& r, edm::EventSetup const& es) {
@@ -45,6 +48,14 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
                          new hcaldqm::quantity::EventType(_eventtypes),
                          new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                          0);
+
+  // Initialize _cUHTRType analogous to _cEventType
+  _cUHTRType.initialize(_name,
+                        "UHTRType",
+                        new hcaldqm::quantity::LumiSection(_maxLS),
+                        new hcaldqm::quantity::EventType(_uHTRtypes),
+                        new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                        0);
 
   _cTotalCharge.initialize(_name,
                            "TotalCharge",
@@ -73,6 +84,7 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
   _cTotalChargeProfile.book(ib, _subsystem);
   _cEventType_uMNio.book(ib, _subsystem);
   _cEventType_uHTR.book(ib, _subsystem);
+  _cUHTRType.book(ib, _subsystem);
 }
 
 int UMNioTask::getOrbitGapIndex(uint8_t eventType, uint32_t laserType) {
@@ -119,6 +131,22 @@ int UMNioTask::getOrbitGapIndex(uint8_t eventType, uint32_t laserType) {
   return (int)(std::find(_eventtypes.begin(), _eventtypes.end(), orbitGapType) - _eventtypes.begin());
 }
 
+int UMNioTask::getUHTRType(uint8_t eventType) {
+  constants::uHTRType uHTRType = uNull;
+  if (eventType == constants::EVENTTYPE_PHYSICS) {
+    uHTRType = uPhysics;
+  } else if (eventType == constants::EVENTTYPE_PEDESTAL) {
+    uHTRType = uPedestal;
+  } else if (eventType == constants::EVENTTYPE_LED) {
+    uHTRType = uLED;
+  } else if (eventType == constants::EVENTTYPE_HFRADDAM) {
+    uHTRType = uHFRaddam;
+  } else if (eventType == constants::EVENTTYPE_LASER) {
+    uHTRType = uLaser;
+  }
+  return (int)(std::find(_uHTRtypes.begin(), _uHTRtypes.end(), uHTRType) - _uHTRtypes.begin());
+}
+
 /* virtual */ void UMNioTask::_process(edm::Event const& e, edm::EventSetup const& es) {
   auto lumiCache = luminosityBlockCache(e.getLuminosityBlock().index());
   _currentLS = lumiCache->currentLS;
@@ -162,6 +190,8 @@ int UMNioTask::getOrbitGapIndex(uint8_t eventType, uint32_t laserType) {
   uint32_t laserType = cumn->valueUserWord(0);
   _cEventType.fill(_currentLS, getOrbitGapIndex(eventType, laserType));
   _cEventType_uMNio.fill(static_cast<int>(eventType));
+  // Fill _cUHTRType analogous to _cEventType
+  _cUHTRType.fill(_currentLS, getUHTRType(static_cast<uint8_t>(eventflag_uHTR)));
 
   //	Compute the Total Charge in the Detector...
   auto const chbhe = e.getHandle(tokHBHE_);
