@@ -635,7 +635,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
   }
   if (_ptype != fLocal) {
     _LED_ADCvsBX_Subdet.initialize(_name,
-                                   "LED_ADCvsBX",
+                                   "CU_LED_ADCvsBX",
                                    hcaldqm::hashfunctions::fSubdet,
                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fBX_36),
                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256_4),
@@ -643,14 +643,14 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                    0);
 
     _LED_CUCountvsLS_Subdet.initialize(_name,
-                                       "LED_CUCountvsLS",
+                                       "CU_LED_CUCountvsLS",
                                        hcaldqm::hashfunctions::fSubdet,
                                        new hcaldqm::quantity::LumiSection(_maxLS),
                                        new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                        0);
     if (_ptype == fOnline) {
       _LED_CUCountvsLSmod60_Subdet.initialize(_name,
-                                              "LED_CUCountvsLSmod60",
+                                              "CU_LED_CUCountvsLSmod60",
                                               hcaldqm::hashfunctions::fSubdet,
                                               new hcaldqm::quantity::LumiSection(60),
                                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
@@ -658,21 +658,21 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     }
     // Laser monitoring containers
     _LASER_ADCvsBX_Subdet.initialize(_name,
-                                     "LASER_ADCvsBX",
+                                     "CU_LASER_ADCvsBX",
                                      hcaldqm::hashfunctions::fSubdet,
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fBX_36),
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256_4),
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                      0);
     _LASER_CUCountvsLS_Subdet.initialize(_name,
-                                         "LASER_CUCountvsLS",
+                                         "CU_LASER_CUCountvsLS",
                                          hcaldqm::hashfunctions::fSubdet,
                                          new hcaldqm::quantity::LumiSection(_maxLS),
                                          new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                          0);
     if (_ptype == fOnline) {
       _LASER_CUCountvsLSmod60_Subdet.initialize(_name,
-                                                "LASER_CUCountvsLSmod60",
+                                                "CU_LASER_CUCountvsLSmod60",
                                                 hcaldqm::hashfunctions::fSubdet,
                                                 new hcaldqm::quantity::LumiSection(60),
                                                 new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
