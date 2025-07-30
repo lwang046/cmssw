@@ -64,7 +64,8 @@ protected:
     fLED = 4,
     fLASER = 5,
     fCapId = 6,
-    nDigiFlag = 7
+    fRADDAM = 7,
+    nDigiFlag = 8
   };
 
   //	hashes/FED vectors
@@ -214,6 +215,13 @@ protected:
   hcaldqm::Container1D _LASER_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LASER_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LASER_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
+
+  // HFRaddam monitoring stuff
+  double _thresh_raddam;
+  std::map<HcalSubdetector, std::vector<HcalDetId> > _raddamCalibrationChannels;
+  hcaldqm::ContainerSingle1D _Raddam_CUCountvsLS;       // Misfire count vs LS
+  hcaldqm::ContainerSingle1D _Raddam_CUCountvsLSmod60;  // Misfire count vs LS
+  hcaldqm::ContainerSingle2D _Raddam_ADCvsBX;           // Pin diode amplitude vs BX
 
   // Laser monitoring for pin diode channel (0, 31, 0)
   hcaldqm::ContainerSingleProf1D _cSumQvsBX_PinDiode;

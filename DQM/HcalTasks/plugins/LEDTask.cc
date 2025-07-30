@@ -62,7 +62,13 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
+        if (((this_subdet == HcalBarrel || this_subdet == HcalEndcap) &&
+             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1)) ||
+            (this_subdet == HcalForward &&
+             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1 || calibId.cboxChannel() == 2)) ||
+            this_subdet == HcalOuter) {
+          _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
+        }
       }
     }
   }

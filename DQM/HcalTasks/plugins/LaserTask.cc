@@ -91,7 +91,13 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
+        if (((this_subdet == HcalBarrel || this_subdet == HcalEndcap) &&
+             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1)) ||
+            (this_subdet == HcalForward &&
+             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1 || calibId.cboxChannel() == 2)) ||
+            this_subdet == HcalOuter) {
+          _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
+        }
       }
     }
   }
@@ -290,11 +296,11 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
     _cLaserMonTiming.showOverflowX(true);
 
     _cLaserMonADC_TS.initialize(_name + "/LaserMon",
-                                         "ADCvsTS",
-                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
-                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
-                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
-                                         0);
+                                "ADCvsTS",
+                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
+                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                0);
     if (_ptype == fOnline) {
       _cLaserMonSumQ_LS.initialize(_name + "/LaserMon",
                                    "SumQ_LS",
