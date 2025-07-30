@@ -87,10 +87,8 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        _ledCalibrationChannels[this_subdet].push_back(
-            HcalDetId(HcalOther, calibId.ieta(), calibId.iphi(), calibId.cboxChannel()));
-        _laserCalibrationChannels[this_subdet].push_back(
-            HcalDetId(HcalOther, calibId.ieta(), calibId.iphi(), calibId.cboxChannel()));
+        _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
+        _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
       }
     }
   }

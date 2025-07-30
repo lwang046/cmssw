@@ -151,6 +151,8 @@ protected:
   hcaldqm::ContainerProf2D _cTimingDiffLS_SubdetPM;
   hcaldqm::ContainerProf2D _cTimingDiffEvent_SubdetPM;
 
+  hcaldqm::ContainerSingle2D _cLaserMonADC_TS;
+
   //	Summaries
   hcaldqm::Container2D _cSummaryvsLS_FED;
   hcaldqm::ContainerSingle2D _cSummaryvsLS;

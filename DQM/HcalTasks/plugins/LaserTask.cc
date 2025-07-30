@@ -91,8 +91,7 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        _laserCalibrationChannels[this_subdet].push_back(
-            HcalDetId(HcalOther, calibId.ieta(), calibId.iphi(), calibId.cboxChannel()));
+        _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
       }
     }
   }
@@ -290,6 +289,12 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
                                 0);
     _cLaserMonTiming.showOverflowX(true);
 
+    _cLaserMonADC_TS.initialize(_name + "/LaserMon",
+                                         "ADCvsTS",
+                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
+                                         new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                         0);
     if (_ptype == fOnline) {
       _cLaserMonSumQ_LS.initialize(_name + "/LaserMon",
                                    "SumQ_LS",
@@ -429,6 +434,7 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
     _cADCvsTS_SubdetPM.book(ib, _emap, _subsystem);
     _cLaserMonSumQ.book(ib, _subsystem);
     _cLaserMonTiming.book(ib, _subsystem);
+    _cLaserMonADC_TS.book(ib, _subsystem);
     if (_ptype == fOnline) {
       _cLaserMonSumQ_LS.book(ib, _subsystem);
       _cLaserMonTiming_LS.book(ib, _subsystem);
@@ -616,6 +622,9 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   if (laserMonSumQ > _laserMonThreshold) {
     _cLaserMonSumQ.fill(laserMonSumQ);
     _cLaserMonTiming.fill(laserMonTiming);
+    for (int i = 0; i < laserMonDigi.samples(); i++) {
+      _cLaserMonADC_TS.fill(i, laserMonDigi[i].adc());
+    }
     if (_ptype == fOnline) {
       _cLaserMonSumQ_LS.fill(_currentLS, laserMonSumQ);
       _cLaserMonTiming_LS.fill(_currentLS, laserMonTiming);
