@@ -73,29 +73,38 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
     if (HcalGenericDetId(id.rawId()).isHcalCalibDetId()) {
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
+        auto cUch = calibId.cboxChannel();
+        bool isLAS(false), isLED(false), isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
+        
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
+            if (cUch == 2) {
+              isLAS = true;
+            }
             break;
           case HcalEndcap:
             this_subdet = HcalEndcap;
+            if (cUch == 3 || cUch == 5) {
+              isLAS = true;
+            }
             break;
           case HcalOuter:
             this_subdet = HcalOuter;
             break;
           case HcalForward:
             this_subdet = HcalForward;
+            if (cUch == 0 || cUch == 8) {
+              isLAS = true;
+            }
             break;
           default:
             this_subdet = HcalEmpty;
             break;
         }
-        if (((this_subdet == HcalBarrel || this_subdet == HcalEndcap) &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1)) ||
-            (this_subdet == HcalForward &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1 || calibId.cboxChannel() == 2)) ||
-            this_subdet == HcalOuter) {
+        
+        if (isLAS) {
           _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
       }

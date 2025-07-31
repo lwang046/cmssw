@@ -44,29 +44,39 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
     if (HcalGenericDetId(id.rawId()).isHcalCalibDetId()) {
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
+        auto cUch = calibId.cboxChannel();
+        bool isLAS(false), isLED(false), isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
+        
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
+            if (cUch == 0 || cUch == 1) {
+              isLED = true;
+            }
             break;
           case HcalEndcap:
             this_subdet = HcalEndcap;
+            if (cUch == 0 || cUch == 1) {
+              isLED = true;
+            }
             break;
           case HcalOuter:
             this_subdet = HcalOuter;
+            isLED = true;
             break;
           case HcalForward:
             this_subdet = HcalForward;
+            if (cUch == 0 || cUch == 8) {
+              isLED = true;
+            }
             break;
           default:
             this_subdet = HcalEmpty;
             break;
         }
-        if (((this_subdet == HcalBarrel || this_subdet == HcalEndcap) &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1)) ||
-            (this_subdet == HcalForward &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1 || calibId.cboxChannel() == 2)) ||
-            this_subdet == HcalOuter) {
+        
+        if (isLED) {
           _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
       }

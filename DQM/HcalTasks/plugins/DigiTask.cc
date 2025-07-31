@@ -99,10 +99,10 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
             break;
           case HcalForward:
             this_subdet = HcalForward;
-            if (cUch == 0 || cUch == 1 || cUch == 2) {
+            if (cUch == 0 || cUch == 8) {
               isLED = true;
               isLAS = true;
-            } else if (cUch == 3) {
+            } else if (cUch == 9) {
               isRAD = true;
             }
             break;

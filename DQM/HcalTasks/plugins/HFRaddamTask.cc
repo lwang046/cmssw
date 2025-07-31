@@ -124,7 +124,10 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
     if (HcalGenericDetId(id.rawId()).isHcalCalibDetId()) {
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
+        auto cUch = calibId.cboxChannel();
+        bool isLAS(false), isLED(false), isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
+        
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
@@ -137,12 +140,16 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
             break;
           case HcalForward:
             this_subdet = HcalForward;
+            if (cUch == 9) {
+              isRAD = true;
+            }
             break;
           default:
             this_subdet = HcalEmpty;
             break;
         }
-        if (this_subdet == HcalForward && calibId.cboxChannel() == 3) {
+        
+        if (isRAD) {
           _raddamCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
       }
