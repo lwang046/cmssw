@@ -380,15 +380,16 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   }  // End if (_ptype == fOnline || _ptype == fLocal) {
 
   // Initialize laser firing monitoring histograms
-  if (_ptype == fOnline || _ptype == fLocal) {
-    _Laser_ADCvsTS_Subdet.initialize(_name,
+  if (_ptype == fOnline) {
+    _Laser_ADCvsTS_Subdet.initialize(_name + "/CU_Laser",
                                      "CU_ADCvsTS",
                                      hcaldqm::hashfunctions::fSubdet,
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                      0);
-    _Laser_ADCvsEvn_Subdet.initialize(_name,
+  } else if (_ptype == fLocal) {
+    _Laser_ADCvsEvn_Subdet.initialize(_name + "/CU_Laser",
                                       "CU_ADCvsEvn",
                                       hcaldqm::hashfunctions::fSubdet,
                                       new hcaldqm::quantity::EventNumber(_nevents),
@@ -460,8 +461,9 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   }
 
   // Book laser firing monitoring histograms
-  if (_ptype == fOnline || _ptype == fLocal) {
+  if (_ptype == fOnline) {
     _Laser_ADCvsTS_Subdet.book(ib, _emap, _subsystem);
+  } else if (_ptype == fLocal) {
     _Laser_ADCvsEvn_Subdet.book(ib, _emap, _subsystem);
   }
 

@@ -228,7 +228,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
                                new hcaldqm::quantity::DetectorQuantity(hcaldqm::quantity::fiphi),
                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTime_ns_250),
                                0);
-    _LED_ADCvsTS_Subdet.initialize(_name,
+    _LED_ADCvsTS_Subdet.initialize(_name + "/CU_LED",
                                    "CU_ADCvsTS",
                                    hcaldqm::hashfunctions::fSubdet,
                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
@@ -236,7 +236,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                    0);
   } else if (_ptype == fLocal) {
-    _LED_ADCvsEvn_Subdet.initialize(_name,
+    _LED_ADCvsEvn_Subdet.initialize(_name + "CU_LED",
                                     "CU_ADCvsEvn",
                                     hcaldqm::hashfunctions::fSubdet,
                                     new hcaldqm::quantity::EventNumber(_nevents),
