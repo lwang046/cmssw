@@ -162,19 +162,17 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
     HcalDetId const& did = digi.detid();
     if (did.subdet() != HcalForward) {
       // Raddam monitoring from calibration channels
-      if (_ptype != fLocal) {
-        if (did.subdet() == HcalOther) {
-          HcalOtherDetId hodid(digi.detid());
-          if (hodid.subdet() == HcalCalibration) {
-            if (std::find(_raddamCalibrationChannels[HcalForward].begin(),
-                          _raddamCalibrationChannels[HcalForward].end(),
-                          did) != _raddamCalibrationChannels[HcalForward].end()) {
-              for (int i = 0; i < digi.samples(); i++) {
-                if (_ptype == fOnline) {
-                  _Raddam_ADCvsTS.fill(i, digi[i].adc());
-                } else if (_ptype == fLocal) {
-                  _Raddam_ADCvsEvn.fill((int)e.eventAuxiliary().id().event(), digi[i].adc());
-                }
+      if (did.subdet() == HcalOther) {
+        HcalOtherDetId hodid(digi.detid());
+        if (hodid.subdet() == HcalCalibration) {
+          if (std::find(_raddamCalibrationChannels[HcalForward].begin(),
+                        _raddamCalibrationChannels[HcalForward].end(),
+                        did) != _raddamCalibrationChannels[HcalForward].end()) {
+            for (int i = 0; i < digi.samples(); i++) {
+              if (_ptype == fOnline) {
+                _Raddam_ADCvsTS.fill(i, digi[i].adc());
+              } else if (_ptype == fLocal) {
+                _Raddam_ADCvsEvn.fill((int)e.eventAuxiliary().id().event(), digi[i].adc());
               }
             }
           }

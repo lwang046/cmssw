@@ -63,9 +63,10 @@ protected:
     fUnknownIds = 3,
     fLED = 4,
     fLASER = 5,
-    fCapId = 6,
-    fRADDAM = 7,
-    nDigiFlag = 8
+    fRADDAM = 6,
+    fPinDiode = 7,
+    fCapId = 8,
+    nDigiFlag = 9
   };
 
   //	hashes/FED vectors
@@ -202,21 +203,21 @@ protected:
 
   std::map<HcalSubdetector, short> _capidmbx;  // Expected (capid - BX) % 4 for each subdet
 
-  // LED monitoring stuff
+  // CU LED monitoring stuff
   double _thresh_led;
   std::map<HcalSubdetector, std::vector<HcalDetId> > _ledCalibrationChannels;
   hcaldqm::Container1D _LED_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LED_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LED_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
 
-  // Laser monitoring stuff
+  // CU laser monitoring stuff
   double _thresh_laser;
   std::map<HcalSubdetector, std::vector<HcalDetId> > _laserCalibrationChannels;
   hcaldqm::Container1D _LASER_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LASER_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LASER_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
 
-  // HFRaddam monitoring stuff
+  // CU Raddam monitoring stuff
   double _thresh_raddam;
   std::map<HcalSubdetector, std::vector<HcalDetId> > _raddamCalibrationChannels;
   hcaldqm::ContainerSingle1D _Raddam_CUCountvsLS;       // Misfire count vs LS

@@ -51,7 +51,7 @@ protected:
   //	1D
   std::vector<hcaldqm::ContainerSingle1D> _vcShape;
 
-  // For monitoring Raddam firing: ADC vs TS
+  // For monitoring CU Raddam firing: ADC vs TS
   std::map<HcalSubdetector, std::vector<HcalDetId> > _raddamCalibrationChannels;
   hcaldqm::ContainerSingle2D _Raddam_ADCvsTS;   // Raddam amplitude vs TS for online DQM
   hcaldqm::ContainerSingle2D _Raddam_ADCvsEvn;  // Raddam amplitude vs Evn for local DQM

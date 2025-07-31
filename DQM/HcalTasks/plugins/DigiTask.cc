@@ -33,6 +33,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
   _vflags[fLED] = hcaldqm::flag::Flag("LEDMisfire");
   _vflags[fLASER] = hcaldqm::flag::Flag("LASERMisfire");
   _vflags[fRADDAM] = hcaldqm::flag::Flag("RADDAMMisfire");
+  _vflags[fPinDiode] = hcaldqm::flag::Flag("PinDiodeMisfire");
   _vflags[fCapId] = hcaldqm::flag::Flag("BadCapId");
 
   _qie10InConditions = ps.getUntrackedParameter<bool>("qie10InConditions", true);
@@ -711,7 +712,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                           new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                           0);
     }
-
+    // Laser monitoring containers for pin diode channel (0, 31, 0)
     _cSumQvsBX_PinDiode.initialize(_name + "/PinDiodeMon",
                                    "sumQvsBX",
                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fBX),
@@ -980,14 +981,23 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
 
     //	Explicit check on the DetIds present in the Collection
     HcalDetId const& did = digi.detid();
+    // Pin diode monitoring
+    HcalCalibDetId hcdid(digi.id());
+    if (hcdid.rawId() == constants::HBLasMon.rawId()) {
+      CaloSamples digi_fC = hcaldqm::utilities::loadADC2fCDB<QIE11DataFrame>(_dbService, did, digi);
+      double sumQ = hcaldqm::utilities::sumQDB<QIE11DataFrame>(_dbService, digi_fC, did, digi, 0, digi.samples() - 1);
+      _cSumQvsBX_PinDiode.fill(bx, sumQ);
+      _cSumQvsLS_PinDiode.fill(_currentLS, sumQ);
+      for (int i = 0; i < digi.samples(); i++) {
+        _cADCvsTS_PinDiode.fill(i, digi[i].adc());
+      }
+    }
     if ((did.subdet() != HcalBarrel) && (did.subdet() != HcalEndcap)) {
-      HcalCalibDetId hcdid(digi.id());
-
-      // LED monitoring from calibration channels
       if (_ptype != fLocal) {
         if (did.subdet() == HcalOther) {
           HcalOtherDetId hodid(digi.detid());
           if (hodid.subdet() == HcalCalibration) {
+            // LED monitoring from calibration channels
             if (std::find(_ledCalibrationChannels[HcalEndcap].begin(),
                           _ledCalibrationChannels[HcalEndcap].end(),
                           did) != _ledCalibrationChannels[HcalEndcap].end()) {
@@ -1058,15 +1068,6 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               }
             }
           }
-        }
-      }
-      if (hcdid.rawId() == constants::HBLasMon.rawId()) {
-        CaloSamples digi_fC = hcaldqm::utilities::loadADC2fCDB<QIE11DataFrame>(_dbService, did, digi);
-        double sumQ = hcaldqm::utilities::sumQDB<QIE11DataFrame>(_dbService, digi_fC, did, digi, 0, digi.samples() - 1);
-        _cSumQvsBX_PinDiode.fill(bx, sumQ);
-        _cSumQvsLS_PinDiode.fill(_currentLS, sumQ);
-        for (int i = 0; i < digi.samples(); i++) {
-          _cADCvsTS_PinDiode.fill(i, digi[i].adc());
         }
       }
       continue;
@@ -1274,11 +1275,11 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     //	Explicit check on the DetIds present in the Collection
     HcalDetId const& did = it->id();
     if (did.subdet() != HcalOuter) {
-      // LED monitoring from calibration channels
       if (_ptype != fLocal) {
         if (did.subdet() == HcalOther) {
           HcalOtherDetId hodid(did);
           if (hodid.subdet() == HcalCalibration) {
+            // LED monitoring from calibration channels (HO)
             if (std::find(_ledCalibrationChannels[HcalOuter].begin(), _ledCalibrationChannels[HcalOuter].end(), did) !=
                 _ledCalibrationChannels[HcalOuter].end()) {
               bool channelLEDSignalPresent = false;
@@ -1465,11 +1466,11 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
       //	Explicit check on the DetIds present in the Collection
       HcalDetId const& did = digi.detid();
       if (did.subdet() != HcalForward) {
-        // LED monitoring from calibration channels
         if (_ptype != fLocal) {
           if (did.subdet() == HcalOther) {
             HcalOtherDetId hodid(digi.detid());
             if (hodid.subdet() == HcalCalibration) {
+              // LED monitoring from calibration channels (HF)
               if (std::find(_ledCalibrationChannels[HcalForward].begin(),
                             _ledCalibrationChannels[HcalForward].end(),
                             did) != _ledCalibrationChannels[HcalForward].end()) {
@@ -1810,6 +1811,13 @@ std::shared_ptr<hcaldqm::Cache> DigiTask::globalBeginLuminosityBlock(edm::Lumino
             _vflags[fLASER]._state = hcaldqm::flag::fBAD;
           } else {
             _vflags[fLASER]._state = hcaldqm::flag::fGOOD;
+          }
+          // Pin diode misfires
+          if (_cSumQvsLS_PinDiode.getBinContent(_currentLS) >
+              2000) {  // 2000 fC is the hardcoded threshold for pin diode misfires, this is a temporary fix
+            _vflags[fPinDiode]._state = hcaldqm::flag::fBAD;
+          } else {
+            _vflags[fPinDiode]._state = hcaldqm::flag::fGOOD;
           }
         } else if (hcaldqm::utilities::isFEDHF(eid)) {
           HcalDetId did_hf(hcaldqm::hashfunctions::hash_Subdet(HcalDetId(HcalForward, 29, 1, 1)));
