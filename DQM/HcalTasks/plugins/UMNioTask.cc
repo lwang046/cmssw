@@ -27,7 +27,7 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
   for (uint32_t type = constants::tNull; type < constants::nOrbitGapType; type++) {
     _eventtypes.push_back(type);
   }
-  for (uint32_t type = constants::uNull; type < constants::nHTRType; type++) {
+  for (uint32_t type = constants::uUnknown; type < constants::nHTRType; type++) {
     _uHTRtypes.push_back(type);
   }
 }
@@ -132,7 +132,7 @@ int UMNioTask::getOrbitGapIndex(uint8_t eventType, uint32_t laserType) {
 }
 
 int UMNioTask::getUHTRType(uint8_t eventType) {
-  constants::uHTRType uHTRType = uNull;
+  constants::uHTRType uHTRType = uUnknown;
   if (eventType == constants::EVENTTYPE_PHYSICS) {
     uHTRType = uPhysics;
   } else if (eventType == constants::EVENTTYPE_PEDESTAL) {
@@ -143,8 +143,6 @@ int UMNioTask::getUHTRType(uint8_t eventType) {
     uHTRType = uHFRaddam;
   } else if (eventType == constants::EVENTTYPE_LASER) {
     uHTRType = uLaser;
-  } else {
-    uHTRType = uUnknown;
   }
   return (int)(std::find(_uHTRtypes.begin(), _uHTRtypes.end(), uHTRType) - _uHTRtypes.begin());
 }

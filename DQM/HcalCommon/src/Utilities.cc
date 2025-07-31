@@ -240,8 +240,8 @@ namespace hcaldqm {
     }
     std::string uhtrtype2string(uHTRType type) {
       switch (type) {
-        case uNull:
-          return "Null";
+        case uUnknown:
+          return "Unknown";
         case uPhysics:
           return "Physics";
         case uPedestal:
@@ -252,10 +252,8 @@ namespace hcaldqm {
           return "HFRaddam";
         case uLaser:
           return "Laser";
-        case uUnknown:
-          return "Unknown";
         default:
-          return "Null";
+          return "Unknown";
       }
     }
     int getRBX(uint32_t iphi) { return (((iphi + 2) % 72) + 4 - 1) / 4; }

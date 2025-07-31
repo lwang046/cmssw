@@ -30,10 +30,10 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
   _vflags[fDigiSize] = hcaldqm::flag::Flag("DigiSize");
   _vflags[fNChsHF] = hcaldqm::flag::Flag("NChsHF");
   _vflags[fUnknownIds] = hcaldqm::flag::Flag("UnknownIds");
-  _vflags[fLED] = hcaldqm::flag::Flag("LEDMisfire");
-  _vflags[fLASER] = hcaldqm::flag::Flag("LASERMisfire");
-  _vflags[fRADDAM] = hcaldqm::flag::Flag("RADDAMMisfire");
-  _vflags[fPinDiode] = hcaldqm::flag::Flag("PinDiodeMisfire");
+  _vflags[fLED] = hcaldqm::flag::Flag("LedMonCU");
+  _vflags[fRADDAM] = hcaldqm::flag::Flag("RaddamMon");
+  _vflags[fLASER] = hcaldqm::flag::Flag("LaserMonCU");
+  _vflags[fPinDiode] = hcaldqm::flag::Flag("LaserMon");
   _vflags[fCapId] = hcaldqm::flag::Flag("BadCapId");
 
   _qie10InConditions = ps.getUntrackedParameter<bool>("qie10InConditions", true);
@@ -72,38 +72,52 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     if (HcalGenericDetId(id.rawId()).isHcalCalibDetId()) {
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
+        auto cUch = calibId.cboxChannel();
+        bool isLAS(false), isLED(false), isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
+        
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
+            if (cUch == 0 || cUch == 1) {
+              isLED = true;
+            } else if (cUch == 2) {
+              isLAS = true;
+            }
             break;
           case HcalEndcap:
             this_subdet = HcalEndcap;
+            if (cUch == 0 || cUch == 1) {
+              isLED = true;
+            } else if (cUch == 3 || cUch == 5) {
+              isLAS = true;
+            }
             break;
           case HcalOuter:
             this_subdet = HcalOuter;
+            isLED = true;
             break;
           case HcalForward:
             this_subdet = HcalForward;
+            if (cUch == 0 || cUch == 1 || cUch == 2) {
+              isLED = true;
+              isLAS = true;
+            } else if (cUch == 3) {
+              isRAD = true;
+            }
             break;
           default:
             this_subdet = HcalEmpty;
             break;
         }
-        if (((this_subdet == HcalBarrel || this_subdet == HcalEndcap) &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1)) ||
-            (this_subdet == HcalForward &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1 || calibId.cboxChannel() == 2)) ||
-            this_subdet == HcalOuter) {
+        
+        if (isLED) {
           _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
-        if ((this_subdet == HcalBarrel && calibId.cboxChannel() == 2) ||
-            (this_subdet == HcalEndcap && (calibId.cboxChannel() == 3 || calibId.cboxChannel() == 5)) ||
-            (this_subdet == HcalForward &&
-             (calibId.cboxChannel() == 0 || calibId.cboxChannel() == 1 || calibId.cboxChannel() == 2))) {
+        if (isLAS) {
           _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
-        if (this_subdet == HcalForward && calibId.cboxChannel() == 3) {
+        if (isRAD) {
           _raddamCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
       }

@@ -62,8 +62,8 @@ protected:
     fNChsHF = 2,
     fUnknownIds = 3,
     fLED = 4,
-    fLASER = 5,
-    fRADDAM = 6,
+    fRADDAM = 5,
+    fLASER = 6,
     fPinDiode = 7,
     fCapId = 8,
     nDigiFlag = 9

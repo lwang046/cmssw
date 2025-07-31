@@ -325,14 +325,13 @@ namespace hcaldqm {
       nOrbitGapType = 20,
     };
     enum uHTRType {
-      uNull = 0,
+      uUnknown = 0,
       uPhysics = 1,
       uPedestal = 2,
       uLED = 3,
       uHFRaddam = 4,
       uLaser = 5,
-      uUnknown = 6,
-      nHTRType = 7,
+      nHTRType = 6,
     };
   }  // namespace constants
 }  // namespace hcaldqm
