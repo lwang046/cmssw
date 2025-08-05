@@ -627,7 +627,12 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   QIE11DataFrame laserMonDigi;
   processLaserMon(c_QIE11, laserMonDigi);
 
-  double laserMonSumQ = hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(laserMonDigi, 0, 0, laserMonDigi.samples() - 1);
+  // Calculate minimum of ADC values converted to fC
+  double minAdc2fC = constants::adc2fC[laserMonDigi[0].adc()];
+  for (int i = 1; i < laserMonDigi.samples(); i++) {
+    minAdc2fC = std::min(minAdc2fC, constants::adc2fC[laserMonDigi[i].adc()]);
+  }
+  double laserMonSumQ = hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(laserMonDigi, minAdc2fC, 0, laserMonDigi.samples() - 1);
   double laserMonTiming = 0.;
 
   if (laserMonSumQ > 0.) {

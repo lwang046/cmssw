@@ -1023,7 +1023,12 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     // Pin diode monitoring
     HcalCalibDetId hcdid(digi.id());
     if (hcdid.rawId() == constants::HBLasMon.rawId()) {
-      double laserMonSumQ = hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(digi, 0, 0, digi.samples() - 1);
+      // Calculate minimum of ADC values converted to fC
+      double minAdc2fC = constants::adc2fC[digi[0].adc()];
+      for (int i = 1; i < digi.samples(); i++) {
+        minAdc2fC = std::min(minAdc2fC, constants::adc2fC[digi[i].adc()]);
+      }
+      double laserMonSumQ = hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(digi, minAdc2fC, 0, digi.samples() - 1);
       _cSumQvsBX_PinDiode.fill(bx, laserMonSumQ);
       _cSumQvsLS_PinDiode.fill(_currentLS, laserMonSumQ);
       for (int i = 0; i < digi.samples(); i++) {
