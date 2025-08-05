@@ -45,7 +45,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
         auto cUch = calibId.cboxChannel();
-        bool isLAS(false), isLED(false), isRAD(false);
+        bool isLED(false);
         HcalSubdetector this_subdet = HcalEmpty;
         
         switch (calibId.hcalSubdet()) {
@@ -385,6 +385,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
   for (QIE11DigiCollection::const_iterator it = c_QIE11->begin(); it != c_QIE11->end(); ++it) {
     const QIE11DataFrame digi = static_cast<const QIE11DataFrame>(*it);
     HcalDetId const& did = digi.detid();
+    HcalCalibDetId hcdid(digi.id());
     if ((did.subdet() != HcalBarrel) && (did.subdet() != HcalEndcap)) {
       // LED monitoring from calibration channels
       if (did.subdet() == HcalOther) {
@@ -403,6 +404,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
           } else if (std::find(_ledCalibrationChannels[HcalBarrel].begin(),
                                _ledCalibrationChannels[HcalBarrel].end(),
                                did) != _ledCalibrationChannels[HcalBarrel].end()) {
+            if (hcdid.rawId() == constants::HBLasMon.rawId()) continue;
             for (int i = 0; i < digi.samples(); i++) {
               if (_ptype == fOnline) {
                 _LED_ADCvsTS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), i, digi[i].adc());

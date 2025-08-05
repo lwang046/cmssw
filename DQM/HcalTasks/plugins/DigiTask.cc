@@ -671,6 +671,14 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                    0);
 
+    _LED_ADCvsTS_Subdet.initialize(_name + "/CU_LED",
+                                    "CU_LED_ADCvsTS",
+                                    hcaldqm::hashfunctions::fSubdet,
+                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
+                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                    0);
+
     _LED_CUCountvsLS_Subdet.initialize(_name + "/CU_LED",
                                        "CU_LED_CUCountvsLS",
                                        hcaldqm::hashfunctions::fSubdet,
@@ -693,6 +701,13 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256_4),
                                      new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                      0);
+    _LASER_ADCvsTS_Subdet.initialize(_name + "/CU_Laser",
+                                     "CU_LASER_ADCvsTS",
+                                     hcaldqm::hashfunctions::fSubdet,
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
+                                     new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                     0);
     _LASER_CUCountvsLS_Subdet.initialize(_name + "/CU_Laser",
                                          "CU_LASER_CUCountvsLS",
                                          hcaldqm::hashfunctions::fSubdet,
@@ -712,6 +727,12 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                "CU_Raddam_ADCvsBX",
                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fBX_36),
                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256_4),
+                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                               0);
+    _Raddam_ADCvsTS.initialize(_name + "/CU_Raddam",
+                               "CU_Raddam_ADCvsTS",
+                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                               new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
                                new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                0);
     _Raddam_CUCountvsLS.initialize(_name + "/CU_Raddam",
@@ -740,7 +761,8 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     _cADCvsTS_PinDiode.initialize(_name + "/PinDiodeMon",
                                   "ADCvsTS",
                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
-                                  new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fADC_256),
+                                  new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
+                                  new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
                                   0);
   }
 
@@ -822,18 +844,21 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
 
   if (_ptype != fLocal) {
     _LED_ADCvsBX_Subdet.book(ib, _emap, _subsystem);
+    _LED_ADCvsTS_Subdet.book(ib, _emap, _subsystem);
     _LED_CUCountvsLS_Subdet.book(ib, _emap, _subsystem);
     if (_ptype == fOnline) {
       _LED_CUCountvsLSmod60_Subdet.book(ib, _emap, _subsystem);
     }
     // Book laser monitoring containers
     _LASER_ADCvsBX_Subdet.book(ib, _emap, _subsystem);
+    _LASER_ADCvsTS_Subdet.book(ib, _emap, _subsystem);
     _LASER_CUCountvsLS_Subdet.book(ib, _emap, _subsystem);
     if (_ptype == fOnline) {
       _LASER_CUCountvsLSmod60_Subdet.book(ib, _emap, _subsystem);
     }
     // Book Raddam monitoring containers
     _Raddam_ADCvsBX.book(ib, _subsystem);
+    _Raddam_ADCvsTS.book(ib, _subsystem);
     _Raddam_CUCountvsLS.book(ib, _subsystem);
     if (_ptype == fOnline) {
       _Raddam_CUCountvsLSmod60.book(ib, _subsystem);
@@ -998,10 +1023,9 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
     // Pin diode monitoring
     HcalCalibDetId hcdid(digi.id());
     if (hcdid.rawId() == constants::HBLasMon.rawId()) {
-      CaloSamples digi_fC = hcaldqm::utilities::loadADC2fCDB<QIE11DataFrame>(_dbService, did, digi);
-      double sumQ = hcaldqm::utilities::sumQDB<QIE11DataFrame>(_dbService, digi_fC, did, digi, 0, digi.samples() - 1);
-      _cSumQvsBX_PinDiode.fill(bx, sumQ);
-      _cSumQvsLS_PinDiode.fill(_currentLS, sumQ);
+      double laserMonSumQ = hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(digi, 0, 0, digi.samples() - 1);
+      _cSumQvsBX_PinDiode.fill(bx, laserMonSumQ);
+      _cSumQvsLS_PinDiode.fill(_currentLS, laserMonSumQ);
       for (int i = 0; i < digi.samples(); i++) {
         _cADCvsTS_PinDiode.fill(i, digi[i].adc());
       }
@@ -1018,7 +1042,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               bool channelLEDSignalPresent = false;
               for (int i = 0; i < digi.samples(); i++) {
                 _LED_ADCvsBX_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), bx, digi[i].adc());
-
+                _LED_ADCvsTS_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), i, digi[i].adc());
                 if (digi[i].adc() > _thresh_led) {
                   channelLEDSignalPresent = true;
                 }
@@ -1032,15 +1056,17 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
             } else if (std::find(_ledCalibrationChannels[HcalBarrel].begin(),
                                  _ledCalibrationChannels[HcalBarrel].end(),
                                  did) != _ledCalibrationChannels[HcalBarrel].end()) {
+              if (hcdid.rawId() == constants::HBLasMon.rawId()) continue;
               bool channelLEDSignalPresent = false;
               for (int i = 0; i < digi.samples(); i++) {
                 _LED_ADCvsBX_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), bx, digi[i].adc());
-
+                _LED_ADCvsTS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), i, digi[i].adc());
                 if (digi[i].adc() > _thresh_led) {
                   channelLEDSignalPresent = true;
                 }
               }
               if (channelLEDSignalPresent) {
+                std::cout << __LINE__ << ": digi rawid = " << did.rawId() <<  ", digi.flags = " << digi.flags() << ", digi.linkError = " << digi.linkError() << ", digi.capidError = " << digi.capidError() << std::endl;
                 _LED_CUCountvsLS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS);
                 if (_ptype == fOnline) {
                   _LED_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS % 60);
@@ -1054,6 +1080,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               bool channelLASERSignalPresent = false;
               for (int i = 0; i < digi.samples(); i++) {
                 _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), bx, digi[i].adc());
+                _LASER_ADCvsTS_Subdet.fill(HcalDetId(HcalEndcap, 16, 1, 1), i, digi[i].adc());
                 if (digi[i].adc() > _thresh_laser) {
                   channelLASERSignalPresent = true;
                 }
@@ -1070,6 +1097,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               bool channelLASERSignalPresent = false;
               for (int i = 0; i < digi.samples(); i++) {
                 _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), bx, digi[i].adc());
+                _LASER_ADCvsTS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), i, digi[i].adc());
                 if (digi[i].adc() > _thresh_laser) {
                   channelLASERSignalPresent = true;
                 }
@@ -1299,7 +1327,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               bool channelLEDSignalPresent = false;
               for (int i = 0; i < digi.size(); i++) {
                 _LED_ADCvsBX_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), bx, digi[i].adc());
-
+                _LED_ADCvsTS_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), i, digi[i].adc());
                 if (digi[i].adc() > _thresh_led) {
                   channelLEDSignalPresent = true;
                 }
@@ -1318,6 +1346,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
               bool channelLASERSignalPresent = false;
               for (int i = 0; i < digi.size(); i++) {
                 _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), bx, digi[i].adc());
+                _LASER_ADCvsTS_Subdet.fill(HcalDetId(HcalOuter, 1, 1, 4), i, digi[i].adc());
                 if (digi[i].adc() > _thresh_laser) {
                   channelLASERSignalPresent = true;
                 }
@@ -1491,7 +1520,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                 bool channelLEDSignalPresent = false;
                 for (int i = 0; i < digi.samples(); i++) {
                   _LED_ADCvsBX_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), bx, digi[i].adc());
-
+                  _LED_ADCvsTS_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), i, digi[i].adc());
                   if (digi[i].adc() > _thresh_led) {
                     channelLEDSignalPresent = true;
                   }
@@ -1510,6 +1539,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                 bool channelLASERSignalPresent = false;
                 for (int i = 0; i < digi.samples(); i++) {
                   _LASER_ADCvsBX_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), bx, digi[i].adc());
+                  _LASER_ADCvsTS_Subdet.fill(HcalDetId(HcalForward, 29, 1, 1), i, digi[i].adc());
                   if (digi[i].adc() > _thresh_laser) {
                     channelLASERSignalPresent = true;
                   }
@@ -1528,6 +1558,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                 bool channelRaddamSignalPresent = false;
                 for (int i = 0; i < digi.samples(); i++) {
                   _Raddam_ADCvsBX.fill(bx, digi[i].adc());
+                  _Raddam_ADCvsTS.fill(i, digi[i].adc());
                   if (digi[i].adc() > _thresh_raddam) {
                     channelRaddamSignalPresent = true;
                   }

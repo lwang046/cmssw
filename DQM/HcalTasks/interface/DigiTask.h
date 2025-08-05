@@ -209,6 +209,7 @@ protected:
   hcaldqm::Container1D _LED_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LED_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LED_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
+  hcaldqm::Container2D _LED_ADCvsTS_Subdet;           // Pin diode amplitude vs TS for online DQM
 
   // CU laser monitoring stuff
   double _thresh_laser;
@@ -216,18 +217,20 @@ protected:
   hcaldqm::Container1D _LASER_CUCountvsLS_Subdet;       // Misfire count vs LS
   hcaldqm::Container1D _LASER_CUCountvsLSmod60_Subdet;  // Misfire count vs LS
   hcaldqm::Container2D _LASER_ADCvsBX_Subdet;           // Pin diode amplitude vs BX
+  hcaldqm::Container2D _LASER_ADCvsTS_Subdet;           // Pin diode amplitude vs TS for online DQM
 
   // CU Raddam monitoring stuff
   double _thresh_raddam;
   std::map<HcalSubdetector, std::vector<HcalDetId> > _raddamCalibrationChannels;
   hcaldqm::ContainerSingle1D _Raddam_CUCountvsLS;       // Misfire count vs LS
   hcaldqm::ContainerSingle1D _Raddam_CUCountvsLSmod60;  // Misfire count vs LS
-  hcaldqm::ContainerSingle2D _Raddam_ADCvsBX;           // Pin diode amplitude vs BX
+  hcaldqm::ContainerSingle2D _Raddam_ADCvsBX;           // Raddam amplitude vs BX
+  hcaldqm::ContainerSingle2D _Raddam_ADCvsTS;           // Raddam amplitude vs TS for online DQM
 
   // Laser monitoring for pin diode channel (0, 31, 0)
   hcaldqm::ContainerSingleProf1D _cSumQvsBX_PinDiode;
   hcaldqm::ContainerSingleProf1D _cSumQvsLS_PinDiode;
-  hcaldqm::ContainerSingleProf1D _cADCvsTS_PinDiode;
+  hcaldqm::ContainerSingle2D _cADCvsTS_PinDiode;
 };
 
 #endif

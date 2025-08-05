@@ -74,7 +74,7 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
         auto cUch = calibId.cboxChannel();
-        bool isLAS(false), isLED(false), isRAD(false);
+        bool isLAS(false);
         HcalSubdetector this_subdet = HcalEmpty;
         
         switch (calibId.hcalSubdet()) {

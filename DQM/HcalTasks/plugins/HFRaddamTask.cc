@@ -125,7 +125,7 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
       HcalCalibDetId calibId(id);
       if (calibId.calibFlavor() == HcalCalibDetId::CalibrationBox) {
         auto cUch = calibId.cboxChannel();
-        bool isLAS(false), isLED(false), isRAD(false);
+        bool isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
         
         switch (calibId.hcalSubdet()) {
@@ -175,6 +175,7 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
           if (std::find(_raddamCalibrationChannels[HcalForward].begin(),
                         _raddamCalibrationChannels[HcalForward].end(),
                         did) != _raddamCalibrationChannels[HcalForward].end()) {
+                          std::cout << __LINE__ << "HF Raddam digi rawid = " << did.rawId() << std::endl;
             for (int i = 0; i < digi.samples(); i++) {
               if (_ptype == fOnline) {
                 _Raddam_ADCvsTS.fill(i, digi[i].adc());
