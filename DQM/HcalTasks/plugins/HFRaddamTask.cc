@@ -127,7 +127,7 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
         auto cUch = calibId.cboxChannel();
         bool isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
-        
+
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
@@ -148,7 +148,7 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        
+
         if (isRAD) {
           _raddamCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
@@ -175,7 +175,6 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
           if (std::find(_raddamCalibrationChannels[HcalForward].begin(),
                         _raddamCalibrationChannels[HcalForward].end(),
                         did) != _raddamCalibrationChannels[HcalForward].end()) {
-                          std::cout << __LINE__ << "HF Raddam digi rawid = " << did.rawId() << std::endl;
             for (int i = 0; i < digi.samples(); i++) {
               if (_ptype == fOnline) {
                 _Raddam_ADCvsTS.fill(i, digi[i].adc());
@@ -234,7 +233,7 @@ HFRaddamTask::HFRaddamTask(edm::ParameterSet const& ps)
       for (int iamc = 0; iamc < hamc13->NAMC(); iamc++) {
         HcalUHTRData uhtr(hamc13->AMCPayload(iamc), hamc13->AMCSize(iamc));
         if (static_cast<int>(uhtr.crateId()) == 22 && static_cast<int>(uhtr.slot()) == 1)
-          if (uhtr.getEventType() == constants::EVENTTYPE_LASER) {
+          if (uhtr.getEventType() == constants::EVENTTYPE_HFRADDAM) {
             eventflag_uHTR = true;
             break;
           }

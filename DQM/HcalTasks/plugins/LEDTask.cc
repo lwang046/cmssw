@@ -47,7 +47,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
         auto cUch = calibId.cboxChannel();
         bool isLED(false);
         HcalSubdetector this_subdet = HcalEmpty;
-        
+
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
@@ -75,7 +75,7 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        
+
         if (isLED) {
           _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
@@ -404,7 +404,8 @@ LEDTask::LEDTask(edm::ParameterSet const& ps)
           } else if (std::find(_ledCalibrationChannels[HcalBarrel].begin(),
                                _ledCalibrationChannels[HcalBarrel].end(),
                                did) != _ledCalibrationChannels[HcalBarrel].end()) {
-            if (hcdid.rawId() == constants::HBLasMon.rawId()) continue;
+            if (hcdid.rawId() == constants::HBLasMon.rawId())
+              continue;
             for (int i = 0; i < digi.samples(); i++) {
               if (_ptype == fOnline) {
                 _LED_ADCvsTS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), i, digi[i].adc());

@@ -75,7 +75,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
         auto cUch = calibId.cboxChannel();
         bool isLAS(false), isLED(false), isRAD(false);
         HcalSubdetector this_subdet = HcalEmpty;
-        
+
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
@@ -110,7 +110,7 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        
+
         if (isLED) {
           _ledCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
@@ -672,12 +672,12 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                                    0);
 
     _LED_ADCvsTS_Subdet.initialize(_name + "/CU_LED",
-                                    "CU_LED_ADCvsTS",
-                                    hcaldqm::hashfunctions::fSubdet,
-                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
-                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
-                                    new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
-                                    0);
+                                   "CU_LED_ADCvsTS",
+                                   hcaldqm::hashfunctions::fSubdet,
+                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fTiming_TS),
+                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fQIE10ADC_256),
+                                   new hcaldqm::quantity::ValueQuantity(hcaldqm::quantity::fN),
+                                   0);
 
     _LED_CUCountvsLS_Subdet.initialize(_name + "/CU_LED",
                                        "CU_LED_CUCountvsLS",
@@ -1061,7 +1061,8 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
             } else if (std::find(_ledCalibrationChannels[HcalBarrel].begin(),
                                  _ledCalibrationChannels[HcalBarrel].end(),
                                  did) != _ledCalibrationChannels[HcalBarrel].end()) {
-              if (hcdid.rawId() == constants::HBLasMon.rawId()) continue;
+              if (hcdid.rawId() == constants::HBLasMon.rawId())
+                continue;
               bool channelLEDSignalPresent = false;
               for (int i = 0; i < digi.samples(); i++) {
                 _LED_ADCvsBX_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), bx, digi[i].adc());
@@ -1071,7 +1072,6 @@ DigiTask::DigiTask(edm::ParameterSet const& ps)
                 }
               }
               if (channelLEDSignalPresent) {
-                std::cout << __LINE__ << ": digi rawid = " << did.rawId() <<  ", digi.flags = " << digi.flags() << ", digi.linkError = " << digi.linkError() << ", digi.capidError = " << digi.capidError() << std::endl;
                 _LED_CUCountvsLS_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS);
                 if (_ptype == fOnline) {
                   _LED_CUCountvsLSmod60_Subdet.fill(HcalDetId(HcalBarrel, 1, 1, 1), _currentLS % 60);

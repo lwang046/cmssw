@@ -50,7 +50,7 @@ UMNioTask::UMNioTask(edm::ParameterSet const& ps)
                          0);
 
   // Initialize _cUHTRType analogous to _cEventType
-  _cUHTRType.initialize(_name+"/EventType",
+  _cUHTRType.initialize(_name + "/EventType",
                         "UHTRType",
                         new hcaldqm::quantity::LumiSection(_maxLS),
                         new hcaldqm::quantity::uHTRType(_uHTRtypes),

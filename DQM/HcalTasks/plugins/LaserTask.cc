@@ -76,7 +76,7 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
         auto cUch = calibId.cboxChannel();
         bool isLAS(false);
         HcalSubdetector this_subdet = HcalEmpty;
-        
+
         switch (calibId.hcalSubdet()) {
           case HcalBarrel:
             this_subdet = HcalBarrel;
@@ -103,7 +103,7 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
             this_subdet = HcalEmpty;
             break;
         }
-        
+
         if (isLAS) {
           _laserCalibrationChannels[this_subdet].push_back(HcalDetId(id.rawId()));
         }
@@ -632,7 +632,8 @@ LaserTask::LaserTask(edm::ParameterSet const& ps)
   for (int i = 1; i < laserMonDigi.samples(); i++) {
     minAdc2fC = std::min(minAdc2fC, constants::adc2fC[laserMonDigi[i].adc()]);
   }
-  double laserMonSumQ = hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(laserMonDigi, minAdc2fC, 0, laserMonDigi.samples() - 1);
+  double laserMonSumQ =
+      hcaldqm::utilities::sumQ_v10<QIE11DataFrame>(laserMonDigi, minAdc2fC, 0, laserMonDigi.samples() - 1);
   double laserMonTiming = 0.;
 
   if (laserMonSumQ > 0.) {
